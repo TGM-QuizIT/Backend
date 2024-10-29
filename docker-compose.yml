@@ -6,7 +6,7 @@ services:
     image: quizit-backend:latest
     container_name: QuizIT-Backend
     ports:
-      - "3000:3000"
+      - "${APP_PORT}:${APP_PORT}"
     volumes:
       - .:/app
     environment:
