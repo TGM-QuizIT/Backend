@@ -109,4 +109,56 @@ router.delete('/', function(req, res, next) {
 
 })
 
+/* Jahrgang bearbeiten Request */
+router.put('/', function(req, res, next) {
+  let data = req.body;
+  responseError = {
+    status: "Failure",
+    reason: ""
+  };
+  responseSuccess = {
+    status: "Success",
+    user: null
+  };
+
+  const requiredParameter = ["userId", "userYear"];
+
+  /* Check, if all needed parameters are there */
+  for (const parameter of requiredParameter) {
+    if (!(parameter in data)) {
+      responseError.reason = `Missing parameter: ${parameter}`
+      return res.status(400).json(responseError);
+    }
+  }
+
+  /* Check, if parameters are of the correct type */
+  if (typeof data.userId !== 'number' || !Number.isInteger(data.userId)) {
+    responseError.reason = `Invalid type for parameter: userId. Expected integer.`;
+    return res.status(422).json(responseError);
+  }
+
+  if (typeof data.userYear !== 'number' || !Number.isInteger(data.userYear)) {
+    responseError.reason = `Invalid type for parameter: userYear. Expected integer.`;
+    return res.status(422).json(responseError);
+  }
+
+  const query = "CALL UpdateUser(?, ?)";
+  database.query(query, [data.userId, data.userYear], (error, result) => {
+    if (error) {
+      responseError.reason = "Internal Server Error";
+      res.status(500).json(responseError);
+    } else {
+      if (result[0][0] == null) {
+        responseError.reason = "User not found";
+        res.status(404).json(responseError);
+
+      }
+      else {
+        responseSuccess.user = result[0][0];
+        res.status(200).json(responseSuccess);
+      }
+    }
+  });
+});
+
 module.exports = router;
