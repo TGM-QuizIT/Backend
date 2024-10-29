@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 const mysql = require('mysql2');
+const {response} = require("express");
 
 //Datenbank-Objekt initialisieren
 const database = mysql.createConnection({
@@ -10,18 +11,26 @@ const database = mysql.createConnection({
   database: process.env.DB_NAME,
   port: process.env.DB_PORT
 });
+let responseError = {
+  status: "Failure",
+  reason: ""
+};
+let responseSuccess = {
+  status: "Success"
+};
+
 
 /* User hinzufügen Request */
 router.post('/', function(req, res, next) {
   let data = req.body;
-  const responseError = {
+  responseError = {
     status: "Failure",
     reason: ""
   };
-  const responseSuccess = {
+  responseSuccess = {
     status: "Success",
     user: null
-  }
+  };
 
   const requiredParameter = ["userName", "userYear"];
 
@@ -55,4 +64,49 @@ router.post('/', function(req, res, next) {
   });
 
 });
+
+/* User löschen Request */
+router.delete('/', function(req, res, next) {
+  responseError = {
+    status: "Failure",
+    reason: ""
+  };
+  responseSuccess = {
+    status: "Success"
+  };
+
+  //Check, if mandatory parameter is present
+  if(!req.query.id) {
+    responseError.reason = "Missing parameter: id"
+    return res.status(400).json(responseError)
+  }
+
+  const id = parseInt(req.query.id, 10);
+
+  /* Check, if parameter is the correct type */
+  if (isNaN(id)) {
+    responseError.reason = "Invalid type for parameter: id. Expected integer."
+    return res.status(422).json(responseError);
+  }
+
+  const query = "CALL DeleteUser(?)";
+  database.query(query, [id], (error, result) => {
+    if (error) {
+      responseError.reason = "Internal Server Error";
+      res.status(500).json(responseError);
+    } else {
+        if (result[0][0].affectedRows == 0) {
+          responseError.reason = "User not found";
+          res.status(404).json(responseError);
+        }
+        else {
+          res.status(200).json(responseSuccess);
+        }
+    }
+  })
+
+
+
+})
+
 module.exports = router;
