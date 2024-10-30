@@ -2,26 +2,10 @@ var express = require('express');
 var router = express.Router();
 const {response} = require("express");
 const { executeQuery } = require("../config/database");
+const { validateParams } = require("../config/validator");
+const { createErrorResponse, createSuccessResponse } = require("../config/response");
 
-/* Function, which creates an object for a successful response */
-function createErrorResponse(reason) {
-  return {status: "Failure", reason: reason};
-}
 
-/* Function, which creates an object for a failed response */
-function createSuccessResponse(data = {}) {
-  return {status: "Success", ...data};
-}
-
-/* Function, which checks, if all parameters are present */
-function validateParams(data, requiredParams, res) {
-  for (const param of requiredParams) {
-    if (!(param in data)) {
-      return `Missing parameter: ${param}`;
-    }
-  }
-  return null;
-}
 
 /* User hinzufügen */
 router.post('/', function(req, res, next) {
