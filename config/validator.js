@@ -14,7 +14,13 @@ function validateString (data) {
 }
 
 /* Function, which checks if data is of the type integer */
-function validateInt (data) {
+function validateIntQuery(data) {
+    const num = Number(data);
+    return Number.isInteger(num);
+}
+
+/* Function, which checks if data is of the type integer */
+function validateIntBody (data) {
     return (typeof data === 'number' && Number.isInteger(data))
 }
 
@@ -23,4 +29,4 @@ function validateBoolean (data) {
     return typeof data === 'boolean';
 }
 
-module.exports = { validateParams, validateString, validateInt, validateBoolean };
+module.exports = { validateParams, validateString, validateIntQuery, validateIntBody, validateBoolean };

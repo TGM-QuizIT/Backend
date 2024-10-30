@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 const { executeQuery } = require("../config/database");
-const { validateParams, validateString, validateInt, validateBoolean} = require("../config/validator");
+const { validateParams, validateString, validateIntBody, validateBoolean, validateIntQuery} = require("../config/validator");
 const { createErrorResponse, createSuccessResponse } = require("../config/response");
 
 /* Fach hinzufügen */
@@ -29,27 +29,30 @@ router.post('/', function(req, res) {
 
 /* Fach löschen */
 router.delete('/', function(req, res) {
-    //Check, if mandatory parameter is present
+    console.log("Delete subject request received"); // Log incoming request
+
+    // Check if mandatory parameter is present
     if(!req.query.id) {
         return res.status(400).json(createErrorResponse("Missing parameter: id"));
     }
 
     const id = parseInt(req.query.id, 10);
 
-    /* Check, if parameter is the correct type */
-    if (!validateInt(id)) {
+    // Check if parameter is the correct type
+    if (!validateIntQuery(id)) {
         return res.status(422).json(createErrorResponse("Invalid type for parameter: id. Expected integer."));
     }
 
     executeQuery("CALL DeleteSubject(?)", [id], res, (result) => {
         const affectedRows = result[0][0].affectedRows;
         if (affectedRows === 0) {
-            res.status(404).json(createErrorResponse("Subject not found"));
+            return res.status(404).json(createErrorResponse("Subject not found"));
         } else {
-            res.status(200).json(createSuccessResponse());
+            return res.status(200).json(createSuccessResponse());
         }
     });
 });
+
 
 /* Fach bearbeiten */
 router.put('/', function(req, res) {
@@ -58,7 +61,7 @@ router.put('/', function(req, res) {
     const missingParam = validateParams(data, ["subjectId", "subjectActive", "subjectImageAddress"]);
     if (missingParam) return res.status(400).json(createErrorResponse(missingParam));
 
-    if(!validateInt(data.subjectId)) return res.status(422).json(createErrorResponse(`Invalid type for parameter: subjectId. Expected integer.`));
+    if(!validateIntBody(data.subjectId)) return res.status(422).json(createErrorResponse(`Invalid type for parameter: subjectId. Expected integer.`));
     if(!validateBoolean(data.subjectActive)) return res.status(422).json(createErrorResponse(`Invalid type for parameter: subjectActive. Expected boolean.`));
     if(!validateString(data.subjectImageAddress)) return res.status(422).json(createErrorResponse(`Invalid type for parameter: subjectImageAddress. Expected string.`));
 
@@ -68,6 +71,28 @@ router.put('/', function(req, res) {
             res.status(404).json(createErrorResponse("Subject not found"));
         } else {
             res.status(200).json(createSuccessResponse({ subject: subject }));
+        }
+    });
+});
+
+/* Alle Fächer (eines Users) holen */
+router.get('/', function(req, res) {
+    const idParam = req.query.id;
+    if (idParam !== undefined && !validateIntQuery(idParam)) {
+        return res.status(422).json(createErrorResponse("Invalid type for parameter: id. Expected integer."));
+    }
+
+    const id = idParam ? parseInt(idParam, 10) : null;
+    executeQuery("CALL GetSubjects(?)", [id], res, (result) => {
+        if (result[0][0].result == 0) {
+            res.status(404).json(createErrorResponse("User not found"));
+        }
+        else {
+            const response = {
+                subjects: result[0],
+                ...(id !== null && {userId: id})
+            };
+            res.status(200).json(createSuccessResponse(response));
         }
     });
 });
