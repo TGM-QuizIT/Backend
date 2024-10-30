@@ -51,6 +51,27 @@ router.delete('/', function(req, res) {
     });
 });
 
+/* Fach bearbeiten */
+router.put('/', function(req, res) {
+   const data = req.body;
+    /* Check, if all needed parameters are there */
+    const missingParam = validateParams(data, ["subjectId", "subjectActive", "subjectImageAddress"]);
+    if (missingParam) return res.status(400).json(createErrorResponse(missingParam));
+
+    if(!validateInt(data.subjectId)) return res.status(422).json(createErrorResponse(`Invalid type for parameter: subjectId. Expected integer.`));
+    if(!validateBoolean(data.subjectActive)) return res.status(422).json(createErrorResponse(`Invalid type for parameter: subjectActive. Expected boolean.`));
+    if(!validateString(data.subjectImageAddress)) return res.status(422).json(createErrorResponse(`Invalid type for parameter: subjectImageAddress. Expected string.`));
+
+    executeQuery("CALL UpdateSubject(?, ?, ?)", [data.subjectId, data.subjectActive, data.subjectImageAddress], res, (result) => {
+        const subject = result[0][0];
+        if (!subject) {
+            res.status(404).json(createErrorResponse("Subject not found"));
+        } else {
+            res.status(200).json(createSuccessResponse({ subject: subject }));
+        }
+    });
+});
+
 
 module.exports = router;
 
