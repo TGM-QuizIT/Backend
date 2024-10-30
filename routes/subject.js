@@ -28,4 +28,27 @@ router.post('/', function(req, res, next) {
     });
 });
 
+/* Fach löschen */
+router.delete('/', function(req, res, next) {
+    //Check, if mandatory parameter is present
+    if(!req.query.id) {
+        return res.status(400).json(createErrorResponse("Missing parameter: id"));
+    }
+
+    const id = parseInt(req.query.id, 10);
+
+    /* Check, if parameter is the correct type */
+    if (isNaN(id)) {
+        return res.status(422).json(createErrorResponse("Invalid type for parameter: id. Expected integer."));
+    }
+
+    executeQuery("CALL DeleteSubject(?)", [id], res, (result) => {
+        const affectedRows = result[0][0].affectedRows;
+        if (affectedRows === 0) {
+            res.status(404).json(createErrorResponse("Subject not found"));
+        } else {
+            res.status(200).json(createSuccessResponse());
+        }
+    });
+});
 module.exports = router;
