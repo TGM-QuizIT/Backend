@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 const { executeQuery } = require("../config/database");
-const { validateParams } = require("../config/validator");
+const { validateParams, validateString, validateInt, validateBoolean} = require("../config/validator");
 const { createErrorResponse, createSuccessResponse } = require("../config/response");
 
 /* Fach hinzufügen */
@@ -15,10 +15,10 @@ router.post('/', function(req, res) {
     }
 
     /* Check, if parameters are of the correct type */
-    if (typeof data.subjectName !== 'string') {
+    if (!validateString(data.subjectName)) {
         return res.status(422).json(createErrorResponse('Invalid type for parameter: subjectName. Expected string.'));
     }
-    if (typeof data.subjectImageAddress !== 'string') {
+    if (!validateString(data.subjectImageAddress)) {
         return res.status(422).json(createErrorResponse('Invalid type for parameter: subjectImageAddress. Expected string.'));
     }
 
@@ -37,7 +37,7 @@ router.delete('/', function(req, res) {
     const id = parseInt(req.query.id, 10);
 
     /* Check, if parameter is the correct type */
-    if (isNaN(id)) {
+    if (!validateInt(id)) {
         return res.status(422).json(createErrorResponse("Invalid type for parameter: id. Expected integer."));
     }
 
@@ -50,4 +50,7 @@ router.delete('/', function(req, res) {
         }
     });
 });
+
+
 module.exports = router;
+

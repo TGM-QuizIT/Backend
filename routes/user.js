@@ -1,13 +1,13 @@
 var express = require('express');
 var router = express.Router();
 const { executeQuery } = require("../config/database");
-const { validateParams } = require("../config/validator");
+const { validateParams, validateString, validateInt, validateBoolean } = require("../config/validator");
 const { createErrorResponse, createSuccessResponse } = require("../config/response");
 
 
 
 /* User hinzufügen */
-router.post('/', function(req, res) {
+router.post('/', function(req, res)   {
   const data = req.body;
 
   // Check, if all necessary parameters are there
@@ -17,10 +17,10 @@ router.post('/', function(req, res) {
   }
 
   /* Check, if parameters are of the correct type */
-  if (typeof data.userName !== 'string') {
+  if (!validateString(data.userName)) {
     return res.status(422).json(createErrorResponse('Invalid type for parameter: userName. Expected string.'));
   }
-  if (typeof data.userYear !== 'number' || !Number.isInteger(data.userYear)) {
+  if (!validateInt(data.userYear)) {
     return res.status(422).json(createErrorResponse('Invalid type for parameter: userYear. Expected integer.'));
   }
 
@@ -40,7 +40,7 @@ router.delete('/', function(req, res) {
   const id = parseInt(req.query.id, 10);
 
   /* Check, if parameter is the correct type */
-  if (isNaN(id)) {
+  if (!validateInt(id)) {
     return res.status(422).json(createErrorResponse("Invalid type for parameter: id. Expected integer."));
   }
 
@@ -63,11 +63,11 @@ router.put('/', function(req, res) {
   if (missingParam) return res.status(400).json(createErrorResponse(missingParam));
 
   /* Check, if parameters are of the correct type */
-  if (typeof data.userId !== 'number' || !Number.isInteger(data.userId)) {
+  if (!validateInt(data.userId)) {
     return res.status(422).json(createErrorResponse(`Invalid type for parameter: userId. Expected integer.`));
   }
 
-  if (typeof data.userYear !== 'number' || !Number.isInteger(data.userYear)) {
+  if (!validateInt(data.userYear)) {
     return res.status(422).json(createErrorResponse(`Invalid type for parameter: userYear. Expected integer.`));
   }
 
@@ -92,7 +92,7 @@ router.get('/year', function(req, res) {
   const id = parseInt(req.query.id, 10);
 
   /* Check, if parameter is the correct type */
-  if (isNaN(id)) {
+  if (!validateInt(id)) {
     return res.status(422).json(createErrorResponse("Invalid type for parameter: id. Expected integer."));
   }
   executeQuery("CALL GetUserYear(?)", [id], res, (result) => {
@@ -108,7 +108,7 @@ router.get('/year', function(req, res) {
 /* Alle User (aus einem Jahrgang) holen */
 router.get('/', function(req, res) {
   const yearParam = req.query.year;
-  if (yearParam !== undefined && isNaN(parseInt(yearParam, 10))) {
+  if (yearParam !== undefined && !validateInt(yearParam)) {
     return res.status(422).json(createErrorResponse("Invalid type for parameter: year. Expected integer."));
   }
 
