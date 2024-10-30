@@ -20,7 +20,7 @@ let responseSuccess = {
 };
 
 
-/* User hinzufügen Request */
+/* User hinzufügen */
 router.post('/', function(req, res, next) {
   let data = req.body;
   responseError = {
@@ -65,7 +65,7 @@ router.post('/', function(req, res, next) {
 
 });
 
-/* User löschen Request */
+/* User löschen */
 router.delete('/', function(req, res, next) {
   responseError = {
     status: "Failure",
@@ -241,6 +241,35 @@ router.get('/', function(req, res, next) {
         responseSuccess.year = year
       }
       responseSuccess.users = result[0];
+      res.status(200).json(responseSuccess);
+    }
+  })
+
+})
+
+/* User bereits registriert */
+router.get('/check', function(req, res, next) {
+  responseError = {
+    status: "Failure",
+    reason: ""
+  };
+  responseSuccess = {
+    status: "Success"
+  };
+
+  //Check, if mandatory parameter is present
+  if(!req.query.name) {
+    responseError.reason = "Missing parameter: name"
+    return res.status(400).json(responseError)
+  }
+
+  const query = "CALL CheckUser(?)";
+  database.query(query, [req.query.name], (error, result) => {
+    if (error) {
+      responseError.reason = "Internal Server Error";
+      res.status(500).json(responseError);
+    } else {
+      responseSuccess.registered = result[0][0].userRegistered == 1;
       res.status(200).json(responseSuccess);
     }
   })
