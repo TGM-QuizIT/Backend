@@ -1,6 +1,5 @@
 var express = require('express');
 var router = express.Router();
-const {response} = require("express");
 const { executeQuery } = require("../config/database");
 const { validateParams } = require("../config/validator");
 const { createErrorResponse, createSuccessResponse } = require("../config/response");
@@ -8,7 +7,7 @@ const { createErrorResponse, createSuccessResponse } = require("../config/respon
 
 
 /* User hinzufügen */
-router.post('/', function(req, res, next) {
+router.post('/', function(req, res) {
   const data = req.body;
 
   // Check, if all necessary parameters are there
@@ -31,7 +30,7 @@ router.post('/', function(req, res, next) {
 });
 
 /* User löschen */
-router.delete('/', function(req, res, next) {
+router.delete('/', function(req, res) {
 
   //Check, if mandatory parameter is present
   if(!req.query.id) {
@@ -56,7 +55,7 @@ router.delete('/', function(req, res, next) {
 });
 
 /* Jahrgang bearbeiten Request */
-router.put('/', function(req, res, next) {
+router.put('/', function(req, res) {
   const data = req.body;
 
   /* Check, if all needed parameters are there */
@@ -83,7 +82,7 @@ router.put('/', function(req, res, next) {
 });
 
 /* Jahrgang eines Users bekommen */
-router.get('/year', function(req, res, next) {
+router.get('/year', function(req, res) {
 
   //Check, if mandatory parameter is present
   if(!req.query.id) {
@@ -107,7 +106,7 @@ router.get('/year', function(req, res, next) {
 });
 
 /* Alle User (aus einem Jahrgang) holen */
-router.get('/', function(req, res, next) {
+router.get('/', function(req, res) {
   const yearParam = req.query.year;
   if (yearParam !== undefined && isNaN(parseInt(yearParam, 10))) {
     return res.status(422).json(createErrorResponse("Invalid type for parameter: year. Expected integer."));
@@ -129,7 +128,7 @@ router.get('/', function(req, res, next) {
 });
 
 /* User bereits registriert */
-router.get('/check', function(req, res, next) {
+router.get('/check', function(req, res) {
 
   const userName = req.query.name;
   if (!userName) return res.status(400).json(createErrorResponse("Missing parameter: name"));

@@ -1,12 +1,11 @@
 var express = require('express');
 var router = express.Router();
-const {response} = require("express");
 const { executeQuery } = require("../config/database");
 const { validateParams } = require("../config/validator");
 const { createErrorResponse, createSuccessResponse } = require("../config/response");
 
 /* Fach hinzufügen */
-router.post('/', function(req, res, next) {
+router.post('/', function(req, res) {
     const data = req.body;
 
     // Check, if all necessary parameters are there
@@ -29,7 +28,7 @@ router.post('/', function(req, res, next) {
 });
 
 /* Fach löschen */
-router.delete('/', function(req, res, next) {
+router.delete('/', function(req, res) {
     //Check, if mandatory parameter is present
     if(!req.query.id) {
         return res.status(400).json(createErrorResponse("Missing parameter: id"));
