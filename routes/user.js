@@ -120,8 +120,7 @@ router.get('/', function(req, res) {
 
   executeQuery("CALL GetUsers(?)", [year], res, (result) => {
     const response = {
-      users: result[0],
-      ...(year !== null && { year })
+      users: result[0]
     };
     res.status(200).json(createSuccessResponse(response));
   });
