@@ -1,13 +1,33 @@
 version: '3.8'
 
 services:
+  db:
+    image: mariadb:latest
+    container_name: QuizIT-DB
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MARIADB_ROOT_PW}
+      MYSQL_DATABASE: ${MARIADB_DATABASE}
+      MYSQL_USER: ${MARIADB_USER}
+      MYSQL_PASSWORD: ${MARIADB_PW}
+    ports:
+      - "${MARIADB_PORT}:${MARIADB_PORT}"
+    volumes:
+      - /var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 30s
+      retries: 3
   web:
     build: .
     image: quizit-backend:latest
     container_name: QuizIT-Backend
-    ports:
-      - "${APP_PORT}:${APP_PORT}"
-    volumes:
-      - .:/app
     environment:
-      - NODE_ENV=production
+      - NODE_ENV=${NODE_ENV}
+      - BASE_APP_PORT=${BASE_APP_PORT}
+      - MAX_APP_PORT=${MAX_APP_PORT}
+    ports:
+      - "${BASE_APP_PORT}:${BASE_APP_PORT}"  # Maps from env dynamically
+    volumes:
+      - .:/usr/src/app
+    depends_on:
+      - db
