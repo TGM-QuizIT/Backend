@@ -9,14 +9,16 @@ services:
       MYSQL_DATABASE: ${MARIADB_DATABASE}
       MYSQL_USER: ${MARIADB_USER}
       MYSQL_PASSWORD: ${MARIADB_PW}
-    ports:
-      - "${MARIADB_PORT}:${MARIADB_PORT}"
     volumes:
-      - /var/lib/mysql
+      - db_data:/var/lib/mysql
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 30s
       retries: 3
+    restart: always
+    networks:
+      - internal # Database can not be accessed from the outside
+
   web:
     build: .
     image: rtarnoczi/quizit-backend:latest
@@ -26,8 +28,25 @@ services:
       - BASE_APP_PORT=${BASE_APP_PORT}
       - MAX_APP_PORT=${MAX_APP_PORT}
     ports:
-      - "${BASE_APP_PORT}:${BASE_APP_PORT}"  # Maps from env dynamically
+      - "${BASE_APP_PORT}:${BASE_APP_PORT}"
     volumes:
       - .:/usr/src/app
     depends_on:
       - db
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${BASE_APP_PORT}/"]
+      interval: 30s
+      retries: 3
+    restart: always
+    networks:
+      - internal
+      - external
+
+networks:
+  internal:
+    internal: true
+  external:
+    driver: bridge
+
+volumes:
+  db_data:
