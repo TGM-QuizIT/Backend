@@ -6,8 +6,8 @@ const http = require('http');
 const portfinder = require('portfinder');
 
 // Set up port range for portfinder.
-portfinder.basePort = parseInt(process.env.PORT_MIN, 10) || 3000;
-portfinder.highestPort = parseInt(process.env.PORT_MAX, 10) || 4000;
+portfinder.basePort = parseInt(process.env.BASE_APP_PORT, 10);
+portfinder.highestPort = parseInt(process.env.MAX_APP_PORT, 10);
 
 async function startServer() {
   let port;
