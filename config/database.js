@@ -1,23 +1,35 @@
-const mysql = require('mysql2');
+const mariadb = require('mariadb');
 const {createErrorResponse} = require("../config/response");
 
-//Datenbank-Objekt initialisieren
-const database = mysql.createConnection({
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PW,
-    database: process.env.DB_NAME,
-    port: process.env.DB_PORT
-});
+const database = mariadb.createPool({
+    host: process.env.MARIADB_HOST,
+    user: "root",
+    password: process.env.MARIADB_ROOT_PW,
+    database: process.env.MARIADB_DATABASE,
+    port: process.env.MARIADB_PORT
+})
 
 /* Function, which executes the queries for the database */
-function executeQuery(query, params, res, successCallback) {
-    database.query(query, params, (error, result) => {
-        if (error) {
-            return res.status(500).json(createErrorResponse("Internal Server Error"));
-        }
+async function executeQuery(query, params, res, successCallback) {
+    let conn;
+    try {
+        conn = await database.getConnection();
+        const result = await conn.query(query, params);
         successCallback(result);
-    });
+
+    } catch (error) {
+        console.error("MariaDB query error:", error);
+        res.status(500).json(createErrorResponse("Internal Server Error"));
+
+    } finally {
+        if (conn) {
+            try {
+                conn.release();
+            } catch (releaseError) {
+                console.error("Error releasing MariaDB connection:", releaseError);
+            }
+        }
+    }
 }
 
 module.exports = { executeQuery };
