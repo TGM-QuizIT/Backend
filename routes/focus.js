@@ -139,7 +139,7 @@ router.get('/', function (req, res) {
             if (result[0][0].result == "404") {
                 res.status(404).json(createErrorResponse("Subject not found"));
             } else {
-                res.status(200).json(createSuccessResponse({focus: result[0][0]}));
+                res.status(200).json(createSuccessResponse({focus: result[0]}));
             }
         },
         (error) => {
