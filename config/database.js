@@ -3,7 +3,7 @@ const {createErrorResponse} = require("../config/response");
 
 const database = mariadb.createPool({
     host: process.env.MARIADB_HOST,
-    user: "root",
+    user: process.env.MARIADB_ROOT_USER,
     password: process.env.MARIADB_ROOT_PW,
     database: process.env.MARIADB_DATABASE,
     port: process.env.MARIADB_PORT

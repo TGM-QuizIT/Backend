@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  db:
+  database:
     image: mariadb:latest
     container_name: QuizIT-DB
     environment:
@@ -16,17 +16,18 @@ services:
       - db_data:/var/lib/mysql
     restart: always
 
-  web:
+  api:
     build: .
     image: rtarnoczi/quizit-backend:latest
     container_name: QuizIT-API
     environment:
       - NODE_ENV=${NODE_ENV}
       - APP_PORT= ${APP_PORT}
+      - MARIADB_HOST=database
     ports:
       - "${APP_PORT}:${APP_PORT}"
     depends_on:
-      - db
+      - database
     restart: always
 
 volumes:
