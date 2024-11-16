@@ -116,6 +116,38 @@ router.put('/', function (req, res) {
 
 });
 
+/* Alle (aktiven) Schwerpunkte zu einem Fach (und Jahr) holen */
+router.get('/', function (req, res) {
+    // Check if mandatory parameter is present
+    if (!req.query.id) {
+        return res.status(400).json(createErrorResponse("Missing parameter: id"));
+    }
+
+    // Check if parameter is the correct type
+    if (!validateIntQuery(req.query.id)) {
+        return res.status(422).json(createErrorResponse("Invalid type for parameter: id. Expected integer."));
+    }
+    if (req.query.year !== undefined && !validateIntQuery(req.query.year)) {
+        return res.status(422).json(createErrorResponse("Invalid type for parameter: year. Expected integer."));
+    }
+    if (req.query.active !== undefined && !validateIntQuery(req.query.active)) {
+        return res.status(422).json(createErrorResponse("Invalid type for parameter: active. Expected integer."));
+    }
+
+    executeQuery("CALL GetFocus(?,?,?)", [req.query.id, req.query.year, req.query.active], res,
+        (result) => {
+            if (result[0][0].result == "404") {
+                res.status(404).json(createErrorResponse("Subject not found"));
+            } else {
+                res.status(200).json(createSuccessResponse({focus: result[0][0]}));
+            }
+        },
+        (error) => {
+            res.status(500).json(createErrorResponse('Internal Server Error'));
+        }
+    );
+});
+
 module.exports = router;
 
 
