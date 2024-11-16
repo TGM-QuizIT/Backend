@@ -78,7 +78,7 @@ router.put('/', function(req, res) {
             if (!subject) {
                 res.status(404).json(createErrorResponse("Subject not found"));
             } else {
-                res.status(200).json(createSuccessResponse({ subject: subject }));
+                res.status(200).json(createSuccessResponse({subject: subject}));
             }
         },
         (error) => {

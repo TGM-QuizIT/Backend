@@ -31,4 +31,4 @@ async function executeQuery(query, params, res, successCallback, failureCallback
     }
 }
 
-module.exports = { executeQuery };
+module.exports = {executeQuery};
