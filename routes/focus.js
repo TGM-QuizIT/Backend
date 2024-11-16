@@ -5,7 +5,7 @@ const { validateParams, validateString, validateIntBody, validateBoolean, valida
 const { createErrorResponse, createSuccessResponse } = require("../config/response");
 
 /* Focus hinzufügen */
-router.post('/', function(req, res) {
+router.post('/', function(req, res)     {
    const data = req.body;
 
     // Check, if all necessary parameters are there
@@ -41,6 +41,35 @@ router.post('/', function(req, res) {
             } else {
                 res.status(500).json(createErrorResponse('Internal Server Error'));
             }
+        }
+    );
+});
+
+/* Focus löschen */
+router.delete('/', function(req, res) {
+    // Check if mandatory parameter is present
+    if(!req.query.id) {
+        return res.status(400).json(createErrorResponse("Missing parameter: id"));
+    }
+
+    const id = parseInt(req.query.id, 10);
+
+    // Check if parameter is the correct type
+    if (!validateIntQuery(id)) {
+        return res.status(422).json(createErrorResponse("Invalid type for parameter: id. Expected integer."));
+    }
+
+    executeQuery("CALL DeleteFocus(?)", [id], res,
+        (result) => {
+            const affectedRows = result[1].affectedRows;
+            if (affectedRows === 0) {
+                return res.status(404).json(createErrorResponse("Focus not found"));
+            } else {
+                return res.status(200).json(createSuccessResponse());
+            }
+        },
+        (error) => {
+            res.status(500).json(createErrorResponse('Internal Server Error'));
         }
     );
 });

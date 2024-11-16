@@ -34,8 +34,6 @@ router.post('/', function(req, res) {
 
 /* Fach löschen */
 router.delete('/', function(req, res) {
-    console.log("Delete subject request received"); // Log incoming request
-
     // Check if mandatory parameter is present
     if(!req.query.id) {
         return res.status(400).json(createErrorResponse("Missing parameter: id"));
@@ -50,7 +48,7 @@ router.delete('/', function(req, res) {
 
     executeQuery("CALL DeleteSubject(?)", [id], res,
         (result) => {
-            const affectedRows = result[0][0].affectedRows;
+            const affectedRows = result[1].affectedRows;
             if (affectedRows === 0) {
                 return res.status(404).json(createErrorResponse("Subject not found"));
             } else {
