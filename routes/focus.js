@@ -41,7 +41,8 @@ router.post('/', function(req, res) {
             } else {
                 res.status(500).json(createErrorResponse('Internal Server Error'));
             }
-        });
+        }
+    );
 });
 
 module.exports = router;

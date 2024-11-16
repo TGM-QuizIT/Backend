@@ -22,9 +22,14 @@ router.post('/', function(req, res) {
         return res.status(422).json(createErrorResponse('Invalid type for parameter: subjectImageAddress. Expected string.'));
     }
 
-    executeQuery("CALL InsertSubject(?,?)", [data.subjectName, data.subjectImageAddress], res, (result) => {
-        res.status(201).json(createSuccessResponse({ subject: result[0][0] }));
-    });
+    executeQuery("CALL InsertSubject(?,?)", [data.subjectName, data.subjectImageAddress], res,
+        (result) => {
+            res.status(201).json(createSuccessResponse({ subject: result[0][0] }));
+        },
+        (error) => {
+            res.status(500).json(createErrorResponse('Internal Server Error'));
+        }
+    );
 });
 
 /* Fach löschen */
@@ -43,16 +48,20 @@ router.delete('/', function(req, res) {
         return res.status(422).json(createErrorResponse("Invalid type for parameter: id. Expected integer."));
     }
 
-    executeQuery("CALL DeleteSubject(?)", [id], res, (result) => {
-        const affectedRows = result[0][0].affectedRows;
-        if (affectedRows === 0) {
-            return res.status(404).json(createErrorResponse("Subject not found"));
-        } else {
-            return res.status(200).json(createSuccessResponse());
+    executeQuery("CALL DeleteSubject(?)", [id], res,
+        (result) => {
+            const affectedRows = result[0][0].affectedRows;
+            if (affectedRows === 0) {
+                return res.status(404).json(createErrorResponse("Subject not found"));
+            } else {
+                return res.status(200).json(createSuccessResponse());
+            }
+        },
+        (error) => {
+            res.status(500).json(createErrorResponse('Internal Server Error'));
         }
-    });
+    );
 });
-
 
 /* Fach bearbeiten */
 router.put('/', function(req, res) {
@@ -65,14 +74,19 @@ router.put('/', function(req, res) {
     if(!validateBoolean(data.subjectActive)) return res.status(422).json(createErrorResponse(`Invalid type for parameter: subjectActive. Expected boolean.`));
     if(!validateString(data.subjectImageAddress)) return res.status(422).json(createErrorResponse(`Invalid type for parameter: subjectImageAddress. Expected string.`));
 
-    executeQuery("CALL UpdateSubject(?, ?, ?)", [data.subjectId, data.subjectActive, data.subjectImageAddress], res, (result) => {
-        const subject = result[0][0];
-        if (!subject) {
-            res.status(404).json(createErrorResponse("Subject not found"));
-        } else {
-            res.status(200).json(createSuccessResponse({ subject: subject }));
+    executeQuery("CALL UpdateSubject(?, ?, ?)", [data.subjectId, data.subjectActive, data.subjectImageAddress], res,
+        (result) => {
+            const subject = result[0][0];
+            if (!subject) {
+                res.status(404).json(createErrorResponse("Subject not found"));
+            } else {
+                res.status(200).json(createSuccessResponse({ subject: subject }));
+            }
+        },
+        (error) => {
+            res.status(500).json(createErrorResponse('Internal Server Error'));
         }
-    });
+    );
 });
 
 /* Alle Fächer (eines Users) holen */
@@ -83,18 +97,23 @@ router.get('/', function(req, res) {
     }
 
     const id = idParam ? parseInt(idParam, 10) : null;
-    executeQuery("CALL GetSubjects(?)", [id], res, (result) => {
-        if (result[0][0].result == 0) {
-            res.status(404).json(createErrorResponse("User not found"));
+    executeQuery("CALL GetSubjects(?)", [id], res,
+        (result) => {
+            if (result[0][0].result == 0) {
+                res.status(404).json(createErrorResponse("User not found"));
+            }
+            else {
+                const response = {
+                    subjects: result[0],
+                    ...(id !== null && {userId: id})
+                };
+                res.status(200).json(createSuccessResponse(response));
+            }
+        },
+        (error) => {
+            res.status(500).json(createErrorResponse('Internal Server Error'));
         }
-        else {
-            const response = {
-                subjects: result[0],
-                ...(id !== null && {userId: id})
-            };
-            res.status(200).json(createSuccessResponse(response));
-        }
-    });
+    );
 });
 
 
