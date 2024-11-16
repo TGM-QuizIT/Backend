@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  database:
+    image: mariadb:latest
+    container_name: QuizIT-DB
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MARIADB_ROOT_PW}
+      MYSQL_DATABASE: ${MARIADB_DATABASE}
+      MYSQL_USER: ${MARIADB_USER}
+      MYSQL_PASSWORD: ${MARIADB_PW}
+      DB_PORT: ${MARIADB_PORT}
+    ports:
+      - "${MARIADB_PORT}:${MARIADB_PORT}"
+    volumes:
+      - db_data:/var/lib/mysql
+    restart: always
+
+  api:
+    build: .
+    image: rtarnoczi/quizit-backend:latest
+    container_name: QuizIT-API
+    environment:
+      - NODE_ENV=${NODE_ENV}
+      - APP_PORT= ${APP_PORT}
+      - MARIADB_HOST=database
+    ports:
+      - "${APP_PORT}:${APP_PORT}"
+    depends_on:
+      - database
+    restart: always
+
+volumes:
+  db_data:
