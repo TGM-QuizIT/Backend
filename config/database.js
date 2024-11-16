@@ -10,7 +10,7 @@ const database = mariadb.createPool({
 })
 
 /* Function, which executes the queries for the database */
-async function executeQuery(query, params, res, successCallback) {
+async function executeQuery(query, params, res, successCallback, failureCallback) {
     let conn;
     try {
         conn = await database.getConnection();
@@ -18,8 +18,7 @@ async function executeQuery(query, params, res, successCallback) {
         successCallback(result);
 
     } catch (error) {
-        console.error("MariaDB query error:", error);
-        res.status(500).json(createErrorResponse("Internal Server Error"));
+        failureCallback(error);
 
     } finally {
         if (conn) {
