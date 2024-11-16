@@ -3,20 +3,9 @@
 const app = require('../app');  // Import the app from app.js
 const debug = require('debug')('quizitbackend:server');
 const http = require('http');
-const portfinder = require('portfinder');
-
-// Set up port range for portfinder.
-portfinder.basePort = parseInt(process.env.BASE_APP_PORT, 10);
-portfinder.highestPort = parseInt(process.env.MAX_APP_PORT, 10);
 
 async function startServer() {
-  let port;
-  try {
-    port = await portfinder.getPortPromise();
-  } catch (error) {
-    console.error('Could not find an available port:', error);
-    process.exit(1);
-  }
+  let port = parseInt(process.env.APP_PORT, 10);
 
   // Create and start HTTP server
   const server = http.createServer(app);
