@@ -113,9 +113,10 @@ router.get('/', function (req, res) {
         return;
     }
 
-    if (req.query.active != 0 && req.query.active != 1) {
-        return res.status(422).json(createErrorResponse("Invalid range for parameter: year. Must be between either 0 or 1."));
+    if (req.query.active !== undefined && req.query.active != 0 && req.query.active != 1) {
+        return res.status(422).json(createErrorResponse("Invalid range for parameter: active. Must be either 0 or 1."));
     }
+
 
     executeQuery("CALL GetFocus(?,?,?)", [req.query.id, req.query.year, req.query.active], res,
         (result) => {
