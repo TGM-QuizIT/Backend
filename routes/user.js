@@ -65,6 +65,9 @@ router.put('/', function (req, res) {
     if (validateBody(data, expected, res)) {
         return;
     }
+    if(data.userYear > 5 || data.userYear < 1) {
+        return res.status(422).json(createErrorResponse("Invalid range for parameter: userYear. Must be between 1 and 5."));
+    }
 
     executeQuery("CALL UpdateUser(?, ?)", [data.userId, data.userYear], res,
         (result) => {
