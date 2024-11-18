@@ -2,11 +2,8 @@ var express = require('express');
 var router = express.Router();
 const {executeQuery} = require("../config/database");
 const {
-    validateParams,
-    validateString,
-    validateIntQuery,
-    validateIntBody,
-    validateBoolean
+    validateBody,
+    validateQuery
 } = require("../config/validator");
 const {createErrorResponse, createSuccessResponse} = require("../config/response");
 
@@ -14,19 +11,13 @@ const {createErrorResponse, createSuccessResponse} = require("../config/response
 /* User hinzufügen */
 router.post('/', function (req, res) {
     const data = req.body;
+    const expected = {
+        userName: 'string',
+        userYear: 'number'
+    };
 
-    // Check, if all necessary parameters are there
-    const missingParam = validateParams(data, ["userName", "userYear"], res);
-    if (missingParam) {
-        return res.status(400).json(createErrorResponse(`Missing parameter: ${missingParam}`));
-    }
-
-    /* Check, if parameters are of the correct type */
-    if (!validateString(data.userName)) {
-        return res.status(422).json(createErrorResponse('Invalid type for parameter: userName. Expected string.'));
-    }
-    if (!validateIntBody(data.userYear)) {
-        return res.status(422).json(createErrorResponse('Invalid type for parameter: userYear. Expected integer.'));
+    if (validateBody(data, expected, res)) {
+        return;
     }
 
     executeQuery("CALL InsertUser(?,?)", [data.userName, data.userYear], res,
@@ -41,30 +32,25 @@ router.post('/', function (req, res) {
 
 /* User löschen */
 router.delete('/', function (req, res) {
+    const data = req.query;
+    const expected = {
+        id: 'number',
+    };
 
-    //Check, if mandatory parameter is present
-    if (!req.query.id) {
-        return res.status(400).json(createErrorResponse("Missing parameter: id"));
+    if(validateQuery(data, expected, res)) {
+        return;
     }
 
-    const id = parseInt(req.query.id, 10);
-
-    /* Check, if parameter is the correct type */
-    if (!validateIntQuery(id)) {
-        return res.status(422).json(createErrorResponse("Invalid type for parameter: id. Expected integer."));
-    }
-
-    executeQuery("CALL DeleteUser(?)", [id], res,
+    executeQuery("CALL DeleteUser(?)", [data.id], res,
         (result) => {
-            const affectedRows = result[0][0].affectedRows;
-            if (affectedRows === 0) {
+            if (result[0][0].result == "404") {
                 res.status(404).json(createErrorResponse("User not found"));
             } else {
                 res.status(200).json(createSuccessResponse());
             }
         },
         (error) => {
-            res.status(500).json(createErrorResponse('Internal Server Error'));
+            res.status(500).json(createErrorResponse("Internal Server Error"));
         }
     );
 });
@@ -72,18 +58,15 @@ router.delete('/', function (req, res) {
 /* Jahrgang bearbeiten Request */
 router.put('/', function (req, res) {
     const data = req.body;
-
-    /* Check, if all needed parameters are there */
-    const missingParam = validateParams(data, ["userId", "userYear"]);
-    if (missingParam) return res.status(400).json(createErrorResponse(missingParam));
-
-    /* Check, if parameters are of the correct type */
-    if (!validateIntBody(data.userId)) {
-        return res.status(422).json(createErrorResponse(`Invalid type for parameter: userId. Expected integer.`));
+    const expected = {
+        userId: 'number',
+        userYear: 'number'
+    };
+    if (validateBody(data, expected, res)) {
+        return;
     }
-
-    if (!validateIntBody(data.userYear)) {
-        return res.status(422).json(createErrorResponse(`Invalid type for parameter: userYear. Expected integer.`));
+    if(data.userYear > 5 || data.userYear < 1) {
+        return res.status(422).json(createErrorResponse("Invalid range for parameter: userYear. Must be between 1 and 5."));
     }
 
     executeQuery("CALL UpdateUser(?, ?)", [data.userId, data.userYear], res,
@@ -103,19 +86,15 @@ router.put('/', function (req, res) {
 
 /* Jahrgang eines Users bekommen */
 router.get('/year', function (req, res) {
-
-    //Check, if mandatory parameter is present
-    if (!req.query.id) {
-        return res.status(400).json(createErrorResponse("Missing parameter: id"));
+    const data = req.query
+    const expected = {
+        id: 'number',
+    };
+    if(validateQuery(data, expected, res)) {
+        return;
     }
 
-    const id = parseInt(req.query.id, 10);
-
-    /* Check, if parameter is the correct type */
-    if (!validateIntQuery(id)) {
-        return res.status(422).json(createErrorResponse("Invalid type for parameter: id. Expected integer."));
-    }
-    executeQuery("CALL GetUserYear(?)", [id], res,
+    executeQuery("CALL GetUserYear(?)", [data.id], res,
         (result) => {
             const user = result[0][0];
             if (!user) {
@@ -132,18 +111,19 @@ router.get('/year', function (req, res) {
 
 /* Alle User (aus einem Jahrgang) holen */
 router.get('/', function (req, res) {
-    const yearParam = req.query.year;
-    if (yearParam !== undefined && !validateIntQuery(yearParam)) {
-        return res.status(422).json(createErrorResponse("Invalid type for parameter: year. Expected integer."));
+    const data = req.query;
+    const expected = {
+        year: 'optional number'
+    };
+    if(validateQuery(data, expected, res)) {
+        return;
     }
 
-    const year = yearParam ? parseInt(yearParam, 10) : null;
-
-    if (year !== null && (year > 5 || year < 1)) {
-        return res.status(404).json(createErrorResponse("Invalid range for parameter: year. Must be between 1 and 5."));
+    if(data.year > 5 || data.year < 1) {
+        return res.status(422).json(createErrorResponse("Invalid range for parameter: year. Must be between 1 and 5."));
     }
 
-    executeQuery("CALL GetUsers(?)", [year], res,
+    executeQuery("CALL GetUsers(?)", [data.year], res,
         (result) => {
             const response = {
                 users: result[0]
@@ -158,11 +138,15 @@ router.get('/', function (req, res) {
 
 /* User bereits registriert */
 router.get('/check', function (req, res) {
+    const data = req.query;
+    const expected = {
+        name: 'string'
+    };
+    if(validateQuery(data, expected, res)) {
+        return;
+    }
 
-    const userName = req.query.name;
-    if (!userName) return res.status(400).json(createErrorResponse("Missing parameter: name"));
-
-    executeQuery("CALL CheckUser(?)", [userName], res,
+    executeQuery("CALL CheckUser(?)", [data.name], res,
         (result) => {
             res.status(200).json(createSuccessResponse({registered: result[0][0].userRegistered === 1}));
         },
