@@ -1,25 +1,21 @@
 var express = require('express');
 var router = express.Router();
 const { executeQuery } = require("../config/database");
-const { validateParams, validateString, validateIntBody, validateBoolean, validateIntQuery} = require("../config/validator");
+const {
+    validateBody,
+    validateQuery
+} = require("../config/validator");
 const { createErrorResponse, createSuccessResponse } = require("../config/response");
 
 /* Fach hinzufügen */
 router.post('/', function(req, res) {
     const data = req.body;
-
-    // Check, if all necessary parameters are there
-    const missingParam = validateParams(data, ["subjectName", "subjectImageAddress"], res);
-    if (missingParam) {
-        return res.status(400).json(createErrorResponse(`Missing parameter: ${missingParam}`));
-    }
-
-    /* Check, if parameters are of the correct type */
-    if (!validateString(data.subjectName)) {
-        return res.status(422).json(createErrorResponse('Invalid type for parameter: subjectName. Expected string.'));
-    }
-    if (!validateString(data.subjectImageAddress)) {
-        return res.status(422).json(createErrorResponse('Invalid type for parameter: subjectImageAddress. Expected string.'));
+    const expected = {
+        subjectName: 'string',
+        subjectImageAddress: 'string'
+    };
+    if (validateBody(data, expected, res)) {
+        return;
     }
 
     executeQuery("CALL InsertSubject(?,?)", [data.subjectName, data.subjectImageAddress], res,
@@ -34,25 +30,21 @@ router.post('/', function(req, res) {
 
 /* Fach löschen */
 router.delete('/', function(req, res) {
-    // Check if mandatory parameter is present
-    if(!req.query.id) {
-        return res.status(400).json(createErrorResponse("Missing parameter: id"));
+    const data = req.query;
+    const expected = {
+        id: 'number',
+    };
+
+    if(validateQuery(data, expected, res)) {
+        return;
     }
 
-    const id = parseInt(req.query.id, 10);
-
-    // Check if parameter is the correct type
-    if (!validateIntQuery(id)) {
-        return res.status(422).json(createErrorResponse("Invalid type for parameter: id. Expected integer."));
-    }
-
-    executeQuery("CALL DeleteSubject(?)", [id], res,
+    executeQuery("CALL DeleteSubject(?)", [data.id], res,
         (result) => {
-            const affectedRows = result[1].affectedRows;
-            if (affectedRows === 0) {
-                return res.status(404).json(createErrorResponse("Subject not found"));
+            if (result[0][0].result == "404") {
+                res.status(404).json(createErrorResponse("Subject not found"));
             } else {
-                return res.status(200).json(createSuccessResponse());
+                res.status(200).json(createSuccessResponse());
             }
         },
         (error) => {
@@ -64,13 +56,14 @@ router.delete('/', function(req, res) {
 /* Fach bearbeiten */
 router.put('/', function(req, res) {
    const data = req.body;
-    /* Check, if all needed parameters are there */
-    const missingParam = validateParams(data, ["subjectId", "subjectActive", "subjectImageAddress"]);
-    if (missingParam) return res.status(400).json(createErrorResponse(missingParam));
-
-    if(!validateIntBody(data.subjectId)) return res.status(422).json(createErrorResponse(`Invalid type for parameter: subjectId. Expected integer.`));
-    if(!validateBoolean(data.subjectActive)) return res.status(422).json(createErrorResponse(`Invalid type for parameter: subjectActive. Expected boolean.`));
-    if(!validateString(data.subjectImageAddress)) return res.status(422).json(createErrorResponse(`Invalid type for parameter: subjectImageAddress. Expected string.`));
+   const expected = {
+       subjectId: 'number',
+       subjectActive: 'boolean',
+       subjectImageAddress: 'string'
+   };
+    if (validateBody(data, expected, res)) {
+        return;
+    }
 
     executeQuery("CALL UpdateSubject(?, ?, ?)", [data.subjectId, data.subjectActive, data.subjectImageAddress], res,
         (result) => {
@@ -89,26 +82,30 @@ router.put('/', function(req, res) {
 
 /* Alle Fächer (eines Users) holen */
 router.get('/', function(req, res) {
-    const idParam = req.query.id;
-    if (idParam !== undefined && !validateIntQuery(idParam)) {
-        return res.status(422).json(createErrorResponse("Invalid type for parameter: id. Expected integer."));
+    const data = req.query;
+    const expected = {
+        id: 'optional number'
+    };
+
+    if(validateQuery(data, expected, res)) {
+        return;
     }
 
-    const id = idParam ? parseInt(idParam, 10) : null;
-    executeQuery("CALL GetSubjects(?)", [id], res,
+    executeQuery("CALL GetSubjects(?)", [req.query.id], res,
         (result) => {
-            if (result[0][0].result == 0) {
+            if (result[0][0].result == "404") {
                 res.status(404).json(createErrorResponse("User not found"));
             }
             else {
                 const response = {
                     subjects: result[0],
-                    ...(id !== null && {userId: id})
+                    ...(req.query.id !== null && {userId: req.query.id})
                 };
                 res.status(200).json(createSuccessResponse(response));
             }
         },
         (error) => {
+            console.log(error)
             res.status(500).json(createErrorResponse('Internal Server Error'));
         }
     );
