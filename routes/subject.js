@@ -3,12 +3,16 @@ var router = express.Router();
 const { executeQuery } = require("../config/database");
 const {
     validateBody,
-    validateQuery
+    validateQuery,
+    validateKey
 } = require("../config/validator");
 const { createErrorResponse, createSuccessResponse } = require("../config/response");
 
 /* Fach hinzufügen */
 router.post('/', function(req, res) {
+    if (!validateKey(req,res)) {
+        return;
+    }
     const data = req.body;
     const expected = {
         subjectName: 'string',
@@ -30,6 +34,9 @@ router.post('/', function(req, res) {
 
 /* Fach löschen */
 router.delete('/', function(req, res) {
+    if (!validateKey(req,res)) {
+        return;
+    }
     const data = req.query;
     const expected = {
         id: 'number',
@@ -55,6 +62,9 @@ router.delete('/', function(req, res) {
 
 /* Fach bearbeiten */
 router.put('/', function(req, res) {
+    if (!validateKey(req,res)) {
+        return;
+    }
    const data = req.body;
    const expected = {
        subjectId: 'number',
@@ -82,6 +92,9 @@ router.put('/', function(req, res) {
 
 /* Alle Fächer (eines Users) holen */
 router.get('/', function(req, res) {
+    if (!validateKey(req,res)) {
+        return;
+    }
     const data = req.query;
     const expected = {
         id: 'optional number'

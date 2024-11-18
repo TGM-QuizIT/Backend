@@ -3,13 +3,17 @@ var router = express.Router();
 const {executeQuery} = require("../config/database");
 const {
     validateBody,
-    validateQuery
+    validateQuery,
+    validateKey
 } = require("../config/validator");
 const {createErrorResponse, createSuccessResponse} = require("../config/response");
 
 
 /* User hinzufügen */
 router.post('/', function (req, res) {
+    if (!validateKey(req,res)) {
+        return;
+    }
     const data = req.body;
     const expected = {
         userName: 'string',
@@ -32,6 +36,9 @@ router.post('/', function (req, res) {
 
 /* User löschen */
 router.delete('/', function (req, res) {
+    if (!validateKey(req,res)) {
+        return;
+    }
     const data = req.query;
     const expected = {
         id: 'number',
@@ -57,6 +64,9 @@ router.delete('/', function (req, res) {
 
 /* Jahrgang bearbeiten Request */
 router.put('/', function (req, res) {
+    if (!validateKey(req,res)) {
+        return;
+    }
     const data = req.body;
     const expected = {
         userId: 'number',
@@ -86,6 +96,9 @@ router.put('/', function (req, res) {
 
 /* Jahrgang eines Users bekommen */
 router.get('/year', function (req, res) {
+    if (!validateKey(req,res)) {
+        return;
+    }
     const data = req.query
     const expected = {
         id: 'number',
@@ -111,6 +124,10 @@ router.get('/year', function (req, res) {
 
 /* Alle User (aus einem Jahrgang) holen */
 router.get('/', function (req, res) {
+    if (!validateKey(req,res)) {
+        return;
+    }
+
     const data = req.query;
     const expected = {
         year: 'optional number'
@@ -138,6 +155,9 @@ router.get('/', function (req, res) {
 
 /* User bereits registriert */
 router.get('/check', function (req, res) {
+    if (!validateKey(req,res)) {
+        return;
+    }
     const data = req.query;
     const expected = {
         name: 'string'
