@@ -8,7 +8,7 @@ const {
 } = require("../config/validator");
 const {createErrorResponse, createSuccessResponse} = require("../config/response");
 
-/* Fach hinzufügen */
+/* Frage hinzufügen */
 router.post('/', function (req, res) {
     if (!validateKey(req, res)) {
         return;
@@ -85,7 +85,7 @@ router.post('/', function (req, res) {
 
 });
 
-/* Fach löschen */
+/* Frage löschen */
 router.delete('/', function (req, res) {
     if (!validateKey(req, res)) {
         return;
@@ -105,6 +105,83 @@ router.delete('/', function (req, res) {
                 res.status(404).json(createErrorResponse("Question not found"));
             } else {
                 res.status(200).json(createSuccessResponse());
+            }
+        },
+        (error) => {
+            console.error(error)
+            res.status(500).json(createErrorResponse('Internal Server Error'));
+        }
+    );
+});
+
+/* Frage bearbeiten */
+router.put('/', function (req,res) {
+    if (!validateKey(req, res)) {
+        return;
+    }
+    const data = req.body;
+    const expected = {
+        questionId: 'number',
+        questionText: 'string',
+        options: [
+            {
+                optionId: 'number',
+                optionText: 'string',
+                optionCorrect: 'boolean',
+            },
+        ],
+        focusId: 'number',
+        mChoice: 'boolean',
+        textInput: 'optional boolean',
+        imageAddress: 'optional string'
+    };
+    if (validateBody(data, expected, res)) {
+        return;
+    }
+    executeQuery("CALL UpdateQuestion(?,?,?,?,?,?)", [data.questionId, data.questionText, data.focusId, data.mChoice, data.textInput, data.imageAddress], res,
+        (result) => {
+            if (result[0][0].result == "404") {
+                res.status(404).json(createErrorResponse("Focus not found"));
+            } else {
+                const questionId = data.questionId;
+                const options = data.options;
+                options.forEach((option) => {
+                    executeQuery("CALL UpdateOption(?,?,?,?)", [option.optionId,option.optionText, option.optionCorrect, questionId], res,
+                        (otherResult) => {
+                            if (otherResult[0][0].result == "404") {
+                                res.status(404).json(createErrorResponse("Option not found"));
+                            }
+                        },
+                        (error) => {
+                            console.error(error)
+                            res.status(500).json(createErrorResponse('Internal Server Error'));
+                        }
+                    );
+                });
+                executeQuery("CALL FetchQuestion(?)", [questionId], res,
+                    (otherResult) => {
+                        const questionData = otherResult[0];
+                        const options = questionData.map(option => ({
+                            optionId: option.optionId,
+                            optionText: option.optionText,
+                            optionCorrect: option.optionCorrect === 1
+                        }));
+                        const question = {
+                            questionId: questionId,
+                            questionText: questionData[0].questionText,
+                            options: options,
+                            focusId: questionData[0].focusId,
+                            mChoice: questionData[0].mChoice === 1,
+                            textInput: questionData[0].textInput === 1,
+                            imageAddress: questionData[0].imageAddress
+                        };
+                        res.status(200).json(createSuccessResponse({question: question}));
+                    },
+                    (error) => {
+                        console.error(error)
+                        res.status(500).json(createErrorResponse('Internal Server Error'));
+                    }
+                );
             }
         },
         (error) => {
