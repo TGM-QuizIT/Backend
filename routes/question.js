@@ -51,7 +51,7 @@ router.post('/', function (req, res) {
                         }
                     );
                 });
-                executeQuery("CALL FetchQuestion(?)", [questionId], res,
+                executeQuery("CALL GetSingleQuestion(?)", [questionId], res,
                     (otherResult) => {
                         const questionData = otherResult[0];
                         const options = questionData.map(option => ({
@@ -115,7 +115,7 @@ router.delete('/', function (req, res) {
 });
 
 /* Frage bearbeiten */
-router.put('/', function (req,res) {
+router.put('/', function (req, res) {
     if (!validateKey(req, res)) {
         return;
     }
@@ -146,7 +146,7 @@ router.put('/', function (req,res) {
                 const questionId = data.questionId;
                 const options = data.options;
                 options.forEach((option) => {
-                    executeQuery("CALL UpdateOption(?,?,?,?)", [option.optionId,option.optionText, option.optionCorrect, questionId], res,
+                    executeQuery("CALL UpdateOption(?,?,?,?)", [option.optionId, option.optionText, option.optionCorrect, questionId], res,
                         (otherResult) => {
                             if (otherResult[0][0].result == "404") {
                                 res.status(404).json(createErrorResponse("Option not found"));
@@ -158,7 +158,7 @@ router.put('/', function (req,res) {
                         }
                     );
                 });
-                executeQuery("CALL FetchQuestion(?)", [questionId], res,
+                executeQuery("CALL GetSingleQuestion(?)", [questionId], res,
                     (otherResult) => {
                         const questionData = otherResult[0];
                         const options = questionData.map(option => ({
@@ -183,6 +183,50 @@ router.put('/', function (req,res) {
                     }
                 );
             }
+        },
+        (error) => {
+            console.error(error)
+            res.status(500).json(createErrorResponse('Internal Server Error'));
+        }
+    );
+});
+
+/* Fragen zu Schwerpunkt holen */
+router.get('/focus', function (req, res) {
+    if (!validateKey(req, res)) {
+        return;
+    }
+    const data = req.query;
+    const expected = {
+        id: 'number',
+    };
+
+    if (validateQuery(data, expected, res)) {
+        return;
+    }
+
+    executeQuery("CALL GetFocusQuestions(?)", [data.id], res,
+        (result) => {
+            const responseData = result[0]
+            let questionsMap = {};
+            responseData.forEach(item => {
+                if (!questionsMap[item.questionId]) {
+                    questionsMap[item.questionId] = {
+                        questionId: item.questionId,
+                        questionText: item.questionText,
+                        options: [],
+                        mChoice: item.mChoice === 1,
+                        textInput: item.textInput === 1,
+                        imageAddress: item.imageAddress || null
+                    };
+                }
+                questionsMap[item.questionId].options.push({
+                    optionId: item.optionId,
+                    optionText: item.optionText,
+                    optionCorrect: item.optionCorrect === 1
+                });
+            });
+            res.status(200).json(createSuccessResponse({focusId: data.id, questions: Object.values(questionsMap)}));
         },
         (error) => {
             console.error(error)
