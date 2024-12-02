@@ -16,7 +16,7 @@ services:
 
   api:
     build: .
-    image: rtarnoczi/quizit-backend:latest
+    image: rtarnoczi/quizit-backend:test
     container_name: QuizIT-API #Namen anpassen
     platform: linux/arm64
     environment:
