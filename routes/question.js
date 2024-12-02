@@ -235,4 +235,49 @@ router.get('/focus', function (req, res) {
     );
 });
 
+/* Fragen zu Fach (und Jahrgang holen */
+router.get('/subject', function (req, res) {
+    if (!validateKey(req, res)) {
+        return;
+    }
+    const data = req.query;
+    const expected = {
+        id: 'number',
+        year: 'optional number',
+    };
+
+    if (validateQuery(data, expected, res)) {
+        return;
+    }
+
+    executeQuery("CALL GetSubjectQuestions(?,?)", [data.id, data.year], res,
+        (result) => {
+            const responseData = result[0]
+            let questionsMap = {};
+            responseData.forEach(item => {
+                if (!questionsMap[item.questionId]) {
+                    questionsMap[item.questionId] = {
+                        questionId: item.questionId,
+                        questionText: item.questionText,
+                        options: [],
+                        mChoice: item.mChoice === 1,
+                        textInput: item.textInput === 1,
+                        imageAddress: item.imageAddress || null
+                    };
+                }
+                questionsMap[item.questionId].options.push({
+                    optionId: item.optionId,
+                    optionText: item.optionText,
+                    optionCorrect: item.optionCorrect === 1
+                });
+            });
+            res.status(200).json(createSuccessResponse({subjectId: data.id, questions: Object.values(questionsMap)}));
+        },
+        (error) => {
+            console.error(error)
+            res.status(500).json(createErrorResponse('Internal Server Error'));
+        }
+    );
+});
+
 module.exports = router;
