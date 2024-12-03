@@ -107,6 +107,21 @@ function validateQuery(query, expected, res) {
     return false;
 }
 
+function validateKey(req, res) {
+    const key = req.headers['authorization'];
+
+    if(!key) {
+        res.status(401).json(createErrorResponse("Unauthorized: No API key provided."));
+        return false;
+    }
+
+    if (key !== process.env.API_KEY) {
+        res.status(403).json(createErrorResponse("Forbidden: Invalid API key."));
+        return false;
+    }
+
+    return true;
+}
 
 
-module.exports = {validateBody, validateQuery};
+module.exports = {validateBody, validateQuery, validateKey};
