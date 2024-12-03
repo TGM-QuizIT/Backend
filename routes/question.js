@@ -214,6 +214,7 @@ router.get('/focus', function (req, res) {
                     questionsMap[item.questionId] = {
                         questionId: item.questionId,
                         questionText: item.questionText,
+                        focusId: item.focusId,
                         options: [],
                         mChoice: item.mChoice === 1,
                         textInput: item.textInput === 1,
@@ -260,6 +261,7 @@ router.get('/subject', function (req, res) {
                         questionId: item.questionId,
                         questionText: item.questionText,
                         options: [],
+                        focusId: item.focusId,
                         mChoice: item.mChoice === 1,
                         textInput: item.textInput === 1,
                         imageAddress: item.imageAddress || null
