@@ -68,7 +68,7 @@ router.post('/', function (req, res) {
                             textInput: questionData[0].textInput === 1,
                             imageAddress: questionData[0].imageAddress
                         };
-                        res.status(200).json(createSuccessResponse({question: question}));
+                        res.status(201).json(createSuccessResponse({question: question}));
                     },
                     (error) => {
                         console.error(error)
