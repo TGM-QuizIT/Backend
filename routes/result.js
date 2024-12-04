@@ -8,7 +8,7 @@ const {
 } = require("../config/validator");
 const {createErrorResponse, createSuccessResponse} = require("../config/response");
 
-/* Result hinzufügen */
+/* Resultat hinzufügen */
 router.post('/', function (req, res) {
     if (!validateKey(req, res)) {
         return;
@@ -39,6 +39,34 @@ router.post('/', function (req, res) {
         },
         (error) => {
             console.log(error)
+            res.status(500).json(createErrorResponse('Internal Server Error'));
+        }
+    );
+});
+
+/* Resultat löschen */
+router.delete('/', function(req, res) {
+    if (!validateKey(req,res)) {
+        return;
+    }
+    const data = req.query;
+    const expected = {
+        id: 'number',
+    };
+
+    if(validateQuery(data, expected, res)) {
+        return;
+    }
+
+    executeQuery("CALL DeleteResult(?)", [data.id], res,
+        (result) => {
+            if (result[0][0].result == "404") {
+                res.status(404).json(createErrorResponse("Result not found"));
+            } else {
+                res.status(200).json(createSuccessResponse());
+            }
+        },
+        (error) => {
             res.status(500).json(createErrorResponse('Internal Server Error'));
         }
     );
