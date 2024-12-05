@@ -72,4 +72,51 @@ router.delete('/', function(req, res) {
     );
 });
 
+/* Resultat bearbeiten */
+router.put('/', function (req, res) {
+    if (!validateKey(req,res)) {
+        return;
+    }
+    const data = req.body;
+    const expected = {
+        resultId: 'number',
+        resultScore: 'number',
+        userId: 'number',
+        focusId: 'number',
+        resultDate: 'string'
+    };
+    if (validateBody(data, expected, res)) {
+        return;
+    }
+
+    const dateRegex = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/;
+
+    if (!dateRegex.test(data.resultDate)) {
+        res.status(422).json(
+            createErrorResponse(
+                `Invalid format for parameter resultDate`
+            )
+        );
+    }
+
+    executeQuery("CALL UpdateResult(?,?,?,?,?)", [data.resultId, data.resultScore, data.userId, data.focusId, data.resultDate], res,
+        (result) => {
+            if (result[0][0].result == "404") {
+                res.status(404).json(createErrorResponse("Result not found"));
+            } else {
+                res.status(200).json(createSuccessResponse({result: result[0][0]}));
+            }
+        },
+        (error) => {
+            /* Error number for invalid foreign key (userId oder focusId) */
+            if (error.errno == 1452) {
+                res.status(404).json(createErrorResponse('userId or focusId not found'))
+            } else {
+                res.status(500).json(createErrorResponse('Internal Server Error'));
+            }
+        }
+    );
+
+});
+
 module.exports = router;
