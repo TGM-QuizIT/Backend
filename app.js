@@ -42,7 +42,7 @@ app.use((req, res, next) => {
 });
 
 BigInt.prototype.toJSON = function () {
-    return this.toString(); // Convert BigInt to string
+    return Number(this); // Convert BigInt to "normal" integer
 };
 
 // Export the app module without starting it
