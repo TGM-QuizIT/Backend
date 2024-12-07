@@ -119,4 +119,36 @@ router.put('/', function (req, res) {
 
 });
 
+/* Resultat eines Benutzers (und Schwerpunktes) holen */
+router.get('/', function (req, res) {
+    if (!validateKey(req, res)) {
+        return;
+    }
+    const data = req.query;
+    const expected = {
+        userId: 'number',
+        focusId: 'optional number',
+        amount: 'optional number'
+    };
+    if (validateQuery(data, expected, res)) {
+        return;
+    }
+
+    executeQuery("CALL GetResults(?,?,?)", [data.userId, data.focusId, data.amount], res,
+        (result) => {
+            if (result[0][0].result == "404-1") {
+                res.status(404).json(createErrorResponse("User not found"));
+            } else if (result[0][0].result == "404-2") {
+                res.status(404).json(createErrorResponse("Focus not found"));
+            } else {
+                res.status(200).json(createSuccessResponse({results: result[0]}));
+            }
+        },
+        (error) => {
+            console.log(error)
+            res.status(500).json(createErrorResponse('Internal Server Error'));
+        }
+    );
+});
+
 module.exports = router;
