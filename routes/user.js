@@ -7,28 +7,34 @@ const {
     validateKey
 } = require("../config/validator");
 const {createErrorResponse, createSuccessResponse} = require("../config/response");
+const {createLDAPRequest} = require("../config/ldap");
 
 
 /* User hinzufügen */
 router.post('/', function (req, res) {
-    if (!validateKey(req,res)) {
+    if (!validateKey(req, res)) {
         return;
     }
     const data = req.body;
     const expected = {
         userName: 'string',
-        userYear: 'number'
+        userFullname: 'string',
+        userClass: 'string',
+        userType: 'string',
+        userMail: 'string'
     };
 
     if (validateBody(data, expected, res)) {
         return;
     }
 
-    executeQuery("CALL InsertUser(?,?)", [data.userName, data.userYear], res,
+    executeQuery("CALL InsertUser(?, ?, ?, ?, ?, ?)", [data.userName, parseInt(data.userClass.charAt(0)), data.userFullname, data.userClass, data.userType, data.userMail], res,
         (result) => {
-            res.status(201).json(createSuccessResponse({user: result[0][0]}));
+            const user = result[0][0];
+            res.status(201).json(createSuccessResponse({user: user}));
         },
-        (error) => {
+        (thirdError) => {
+            console.error(thirdError)
             res.status(500).json(createErrorResponse('Internal Server Error'));
         }
     );
@@ -36,7 +42,7 @@ router.post('/', function (req, res) {
 
 /* User löschen */
 router.delete('/', function (req, res) {
-    if (!validateKey(req,res)) {
+    if (!validateKey(req, res)) {
         return;
     }
     const data = req.query;
@@ -44,7 +50,7 @@ router.delete('/', function (req, res) {
         id: 'number',
     };
 
-    if(validateQuery(data, expected, res)) {
+    if (validateQuery(data, expected, res)) {
         return;
     }
 
@@ -64,22 +70,23 @@ router.delete('/', function (req, res) {
 
 /* Jahrgang bearbeiten Request */
 router.put('/', function (req, res) {
-    if (!validateKey(req,res)) {
+    if (!validateKey(req, res)) {
         return;
     }
     const data = req.body;
     const expected = {
         userId: 'number',
-        userYear: 'number'
+        userYear: 'number',
+        userClass: 'string'
     };
     if (validateBody(data, expected, res)) {
         return;
     }
-    if(data.userYear > 5 || data.userYear < 1) {
+    if (data.userYear > 5 || data.userYear < 1) {
         return res.status(422).json(createErrorResponse("Invalid range for parameter: userYear. Must be between 1 and 5."));
     }
 
-    executeQuery("CALL UpdateUser(?, ?)", [data.userId, data.userYear], res,
+    executeQuery("CALL UpdateUser(?, ?, ?)", [data.userId, data.userYear, data.userClass], res,
         (result) => {
             const user = result[0][0];
             if (!user) {
@@ -96,14 +103,14 @@ router.put('/', function (req, res) {
 
 /* Jahrgang eines Users bekommen */
 router.get('/year', function (req, res) {
-    if (!validateKey(req,res)) {
+    if (!validateKey(req, res)) {
         return;
     }
     const data = req.query
     const expected = {
         id: 'number',
     };
-    if(validateQuery(data, expected, res)) {
+    if (validateQuery(data, expected, res)) {
         return;
     }
 
@@ -124,7 +131,7 @@ router.get('/year', function (req, res) {
 
 /* Alle User (aus einem Jahrgang) holen */
 router.get('/', function (req, res) {
-    if (!validateKey(req,res)) {
+    if (!validateKey(req, res)) {
         return;
     }
 
@@ -132,11 +139,11 @@ router.get('/', function (req, res) {
     const expected = {
         year: 'optional number'
     };
-    if(validateQuery(data, expected, res)) {
+    if (validateQuery(data, expected, res)) {
         return;
     }
 
-    if(data.year > 5 || data.year < 1) {
+    if (data.year > 5 || data.year < 1) {
         return res.status(422).json(createErrorResponse("Invalid range for parameter: year. Must be between 1 and 5."));
     }
 
@@ -155,14 +162,14 @@ router.get('/', function (req, res) {
 
 /* User bereits registriert */
 router.get('/check', function (req, res) {
-    if (!validateKey(req,res)) {
+    if (!validateKey(req, res)) {
         return;
     }
     const data = req.query;
     const expected = {
         name: 'string'
     };
-    if(validateQuery(data, expected, res)) {
+    if (validateQuery(data, expected, res)) {
         return;
     }
 
@@ -172,6 +179,77 @@ router.get('/check', function (req, res) {
         },
         (error) => {
             res.status(500).json(createErrorResponse('Internal Server Error'));
+        }
+    );
+});
+
+/* User Login */
+router.post('/login', function (req, res) {
+    if (!validateKey(req, res)) {
+        return;
+    }
+    const data = req.body;
+    const expected = {
+        userName: 'string',
+        password: 'string'
+    };
+
+    if (validateBody(data, expected, res)) {
+        return;
+    }
+
+    createLDAPRequest(data.userName, data.password, res,
+        (result) => {
+            executeQuery("SELECT userId FROM user WHERE userName = ?", [data.userName], res,
+                (otherResult) => {
+                    if (otherResult[0] === undefined) {
+                        const userName = result.mailNickname[0];
+                        const userFullname = result.name[0];
+                        const userClass = result.department[0];
+                        const userType = result.employeeType[0];
+                        const userMail = result.mail[0]
+
+                        executeQuery("CALL InsertUser(?, ?, ?, ?, ?, ?)", [userName, parseInt(userClass.charAt(0)), userFullname, userClass, userType, userMail], res,
+                            (thirdResult) => {
+                                const user = thirdResult[0][0];
+                                res.status(200).json(createSuccessResponse({user: user}));
+                            },
+                            (thirdError) => {
+                                console.error(thirdError)
+                                res.status(500).json(createErrorResponse('Internal Server Error'));
+                            }
+                        );
+                    } else {
+                        const userClass = result.department[0];
+                        executeQuery("CALL UpdateUser(?, ?, ?)", [otherResult[0].userId, userClass.charAt(0), userClass], res,
+                            (thirdResult) => {
+                                const user = thirdResult[0][0];
+                                if (!user) {
+                                    res.status(404).json(createErrorResponse("User not found"));
+                                } else {
+                                    res.status(200).json(createSuccessResponse({user: user}));
+                                }
+                            },
+                            (thirdError) => {
+                                console.error(thirdError)
+                                res.status(500).json(createErrorResponse('Internal Server Error'));
+                            }
+                        );
+                    }
+                },
+                (otherError) => {
+                    console.error(otherError)
+                    res.status(500).json(createErrorResponse('Internal Server Error'));
+                }
+            );
+        },
+        (error) => {
+            if (error == "InvalidCredentialsError") {
+                res.status(401).json(createErrorResponse("Invalid Credentials"))
+            } else {
+                console.error(error)
+                res.status(500).json(createErrorResponse("Internal Server Error"))
+            }
         }
     );
 });
