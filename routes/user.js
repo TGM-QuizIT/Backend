@@ -76,8 +76,7 @@ router.put('/', function (req, res) {
     const data = req.body;
     const expected = {
         userId: 'number',
-        userYear: 'number',
-        userClass: 'string'
+        userYear: 'number'
     };
     if (validateBody(data, expected, res)) {
         return;
@@ -86,7 +85,7 @@ router.put('/', function (req, res) {
         return res.status(422).json(createErrorResponse("Invalid range for parameter: userYear. Must be between 1 and 5."));
     }
 
-    executeQuery("CALL UpdateUser(?, ?, ?)", [data.userId, data.userYear, data.userClass], res,
+    executeQuery("CALL UpdateUserYear(?, ?)", [data.userId, data.userYear], res,
         (result) => {
             const user = result[0][0];
             if (!user) {
@@ -221,7 +220,7 @@ router.post('/login', function (req, res) {
                         );
                     } else {
                         const userClass = result.department[0];
-                        executeQuery("CALL UpdateUser(?, ?, ?)", [otherResult[0].userId, userClass.charAt(0), userClass], res,
+                        executeQuery("CALL UpdateUser(?, ?)", [otherResult[0].userId, userClass], res,
                             (thirdResult) => {
                                 const user = thirdResult[0][0];
                                 if (!user) {
