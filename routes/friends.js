@@ -68,5 +68,34 @@ router.delete('/', function (req, res) {
     );
 });
 
+/* Freundschaft annehmen */
+router.put('/accept', function (req, res) {
+    if (!validateKey(req, res)) {
+        return;
+    }
+    const data = req.body;
+    const expected = {
+        id: 'number',
+    };
+
+    if (validateBody(data, expected, res)) {
+        return;
+    }
+
+    executeQuery("CALL AcceptFriendship(?)", [data.id], res,
+        (result) => {
+            if (result[0][0] && result[0][0].result == "404") {
+                res.status(404).json(createErrorResponse("User was not found."));
+            } else {
+                const friendship = result[0][0];
+                friendship.friendshipPending = Boolean(friendship.friendshipPending);
+                res.status(200).json(createSuccessResponse({friendship: friendship}));
+            }
+        },
+        (error) => {
+            res.status(500).json(createErrorResponse("Internal Server Error"));
+        }
+    );
+});
 
 module.exports = router;
