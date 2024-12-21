@@ -8,8 +8,6 @@ const {
 } = require("../config/validator");
 const {createErrorResponse, createSuccessResponse} = require("../config/response");
 
-/*TODO: User Objekt und nicht nur Ids in Response */
-
 /* Freundschaft hinzufügen */
 router.post('/', function (req, res) {
     if (!validateKey(req, res)) {
@@ -31,8 +29,29 @@ router.post('/', function (req, res) {
                 res.status(404).json(createErrorResponse("User was not found."));
             } else {
                 const friendship = result[0][0];
-                friendship.friendshipPending = Boolean(friendship.friendshipPending);
-                res.status(201).json(createSuccessResponse({friendship: friendship}));
+                const resFriendship = {
+                    friendshipId: friendship.friendshipId,
+                    user1: {
+                        userId: friendship.user1Id,
+                        userName: friendship.user1Name,
+                        userYear: friendship.user1Year,
+                        userFullname: friendship.user1Fullname,
+                        userClass: friendship.user1Class,
+                        userType: friendship.user1Type,
+                        userMail: friendship.user1Mail,
+                    },
+                    user2: {
+                        userId: friendship.user2Id,
+                        userName: friendship.user2Name,
+                        userYear: friendship.user2Year,
+                        userFullname: friendship.user2Fullname,
+                        userClass: friendship.user2Class,
+                        userType: friendship.user2Type,
+                        userMail: friendship.user2Mail,
+                    },
+                    friendshipPending: friendship.friendshipPending === 1
+                }
+                res.status(201).json(createSuccessResponse({friendship: resFriendship}));
             }
         },
         (error) => {
@@ -90,8 +109,29 @@ router.put('/accept', function (req, res) {
                 res.status(404).json(createErrorResponse("User was not found."));
             } else {
                 const friendship = result[0][0];
-                friendship.friendshipPending = Boolean(friendship.friendshipPending);
-                res.status(200).json(createSuccessResponse({friendship: friendship}));
+                const resFriendship = {
+                    friendshipId: friendship.friendshipId,
+                    user1: {
+                        userId: friendship.user1Id,
+                        userName: friendship.user1Name,
+                        userYear: friendship.user1Year,
+                        userFullname: friendship.user1Fullname,
+                        userClass: friendship.user1Class,
+                        userType: friendship.user1Type,
+                        userMail: friendship.user1Mail,
+                    },
+                    user2: {
+                        userId: friendship.user2Id,
+                        userName: friendship.user2Name,
+                        userYear: friendship.user2Year,
+                        userFullname: friendship.user2Fullname,
+                        userClass: friendship.user2Class,
+                        userType: friendship.user2Type,
+                        userMail: friendship.user2Mail,
+                    },
+                    friendshipPending: friendship.friendshipPending === 1
+                }
+                res.status(200).json(createSuccessResponse({friendship: resFriendship}));
             }
         },
         (error) => {
@@ -121,7 +161,7 @@ router.get('/', function (req, res) {
             } else {
                 const friendships = result[0];
                 const resp = createSuccessResponse({
-                    userId: data.id,
+                    userId: parseInt(data.id),
                     acceptedFriendships: [],
                     pendingFriendships: []
                 })
@@ -129,13 +169,30 @@ router.get('/', function (req, res) {
                     if (friendship.friendshipPending === 0) {
                         resp.acceptedFriendships.push({
                             friendshipId: friendship.friendshipId,
-                            friendId: friendship.user1Id === data.id ? friendship.user1Id : friendship.user2Id,
+                            friend: {
+                                userId: friendship.userId,
+                                userName: friendship.userName,
+                                userYear: friendship.userYear,
+                                userFullname: friendship.userFullname,
+                                userClass: friendship.userClass,
+                                userType: friendship.userType,
+                                userMail: friendship.userMail
+                            },
                             friendshipSince: friendship.friendshipSince
                         });
                     } else if (friendship.friendshipPending === 1) {
                         resp.pendingFriendships.push({
                             friendshipId: friendship.friendshipId,
-                            friendId: friendship.user1Id === data.id ? friendship.user1Id : friendship.user2Id
+                            friend: {
+                                userId: friendship.userId,
+                                userName: friendship.userName,
+                                userYear: friendship.userYear,
+                                userFullname: friendship.userFullname,
+                                userClass: friendship.userClass,
+                                userType: friendship.userType,
+                                userMail: friendship.userMail
+                            },
+                            actionReq: friendship.actionReq === 1
                         });
                     }
                 });
