@@ -115,7 +115,6 @@ router.get('/', function (req, res) {
             } else if (result[0][0] && result[0][0].result == "404") {
                 res.status(404).json(createErrorResponse("User not found"));
             } else {
-                console.log(result)
                 const response = {
                     subjects: result[0],
                     ...(req.query.id !== null && {userId: req.query.id})
