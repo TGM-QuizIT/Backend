@@ -133,10 +133,18 @@ router.get('/', function (req, res) {
 
     executeQuery("CALL GetFocus(?,?,?)", [req.query.id, req.query.year, req.query.active], res,
         (result) => {
-            if (result[0][0].result == "404") {
+            if (result[0].length === 0) {
+                const response = {
+                    focus: [],
+                };
+                res.status(200).json(createSuccessResponse(response));
+            } else if (result[0][0] && result[0][0].result == "404") {
                 res.status(404).json(createErrorResponse("Subject not found"));
             } else {
-                res.status(200).json(createSuccessResponse({focus: result[0]}));
+                const response = {
+                    focus: result[0],
+                };
+                res.status(200).json(createSuccessResponse(response));
             }
         },
         (error) => {
