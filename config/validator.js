@@ -53,6 +53,13 @@ function validateBody(data, expected, res) {
                 }
             } else {
                 const cleanType = isOptional ? expectedType.replace('optional', '').trim() : expectedType;
+                if (cleanType === 'string' && typeof actualValue === 'string' && actualValue.trim() === '') {
+                    res.status(400).json(
+                        createErrorResponse(`Parameter cannot be an empty string: ${fullKey}`)
+                    );
+                    return true;
+                }
+
                 if (typeof actualValue !== cleanType) {
                     res.status(422).json(
                         createErrorResponse(
