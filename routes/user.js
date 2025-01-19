@@ -31,6 +31,7 @@ router.post('/', function (req, res) {
     executeQuery("CALL InsertUser(?, ?, ?, ?, ?, ?)", [data.userName, parseInt(data.userClass.charAt(0)), data.userFullname, data.userClass, data.userType, data.userMail], res,
         (result) => {
             const user = result[0][0];
+            user.userBlocked = user.userBlocked === 1;
             res.status(201).json(createSuccessResponse({user: user}));
         },
         (thirdError) => {
@@ -91,6 +92,7 @@ router.put('/', function (req, res) {
             if (!user) {
                 res.status(404).json(createErrorResponse("User not found"));
             } else {
+                user.userBlocked = user.userBlocked === 1;
                 res.status(200).json(createSuccessResponse({user: user}));
             }
         },
@@ -119,6 +121,7 @@ router.get('/year', function (req, res) {
             if (!user) {
                 res.status(404).json(createErrorResponse("User not found"));
             } else {
+                user.userBlocked = user.userBlocked === 1;
                 res.status(200).json(createSuccessResponse({user: user}));
             }
         },
@@ -148,12 +151,21 @@ router.get('/', function (req, res) {
 
     executeQuery("CALL GetUsers(?)", [data.year], res,
         (result) => {
+
+            const users = result[0];
+            if (users.length > 0) {
+                users.forEach(user => {
+                    user.userBlocked = user.userBlocked === 1;
+                });
+            }
+
             const response = {
-                users: result[0]
+                users: users
             };
             res.status(200).json(createSuccessResponse(response));
         },
         (error) => {
+            console.log(error)
             res.status(500).json(createErrorResponse('Internal Server Error'));
         }
     );
@@ -211,6 +223,7 @@ router.post('/login', function (req, res) {
                         executeQuery("CALL InsertUser(?, ?, ?, ?, ?, ?)", [userName, parseInt(userClass.charAt(0)), userFullname, userClass, userType, userMail], res,
                             (thirdResult) => {
                                 const user = thirdResult[0][0];
+                                user.userBlocked = user.userBlocked === 1;
                                 res.status(200).json(createSuccessResponse({user: user}));
                             },
                             (thirdError) => {
@@ -226,6 +239,7 @@ router.post('/login', function (req, res) {
                                 if (!user) {
                                     res.status(404).json(createErrorResponse("User not found"));
                                 } else {
+                                    user.userBlocked = user.userBlocked === 1;
                                     res.status(200).json(createSuccessResponse({user: user}));
                                 }
                             },
@@ -254,7 +268,7 @@ router.post('/login', function (req, res) {
 });
 
 /* User blocken */
-router.put('/block', function(req,res) {
+router.put('/block', function (req, res) {
     if (!validateKey(req, res)) {
         return;
     }
@@ -273,6 +287,7 @@ router.put('/block', function(req,res) {
             if (!user) {
                 res.status(404).json(createErrorResponse("User not found"));
             } else {
+                user.userBlocked = user.userBlocked === 1;
                 res.status(200).json(createSuccessResponse({user: user}));
             }
         },
