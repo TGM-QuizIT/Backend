@@ -130,5 +130,13 @@ function validateKey(req, res) {
     return true;
 }
 
+function formatError(error) {
+    return {
+        message: error.message || "An error occurred",
+        code: error.code || "UNKNOWN_ERROR",
+        stack: error.stack?.split('\n')[0], // Include only the first line of the stack trace
+    };
+}
 
-module.exports = {validateBody, validateQuery, validateKey};
+
+module.exports = {validateBody, validateQuery, validateKey, formatError};

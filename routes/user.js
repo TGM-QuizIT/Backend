@@ -4,7 +4,8 @@ const {executeQuery} = require("../config/database");
 const {
     validateBody,
     validateQuery,
-    validateKey
+    validateKey,
+    formatError
 } = require("../config/validator");
 const {createErrorResponse, createSuccessResponse} = require("../config/response");
 const {createLDAPRequest} = require("../config/ldap");
@@ -34,9 +35,8 @@ router.post('/', function (req, res) {
             user.userBlocked = user.userBlocked === 1;
             res.status(201).json(createSuccessResponse({user: user}));
         },
-        (thirdError) => {
-            console.error(thirdError)
-            res.status(500).json(createErrorResponse('Internal Server Error'));
+        (error) => {
+            res.status(500).json(createErrorResponse('Internal Server Error', formatError(error)));
         }
     );
 });
@@ -64,7 +64,7 @@ router.delete('/', function (req, res) {
             }
         },
         (error) => {
-            res.status(500).json(createErrorResponse("Internal Server Error"));
+            res.status(500).json(createErrorResponse('Internal Server Error', formatError(error)));
         }
     );
 });
@@ -97,7 +97,7 @@ router.put('/', function (req, res) {
             }
         },
         (error) => {
-            res.status(500).json(createErrorResponse('Internal Server Error'));
+            res.status(500).json(createErrorResponse('Internal Server Error', formatError(error)));
         }
     );
 });
@@ -126,7 +126,7 @@ router.get('/year', function (req, res) {
             }
         },
         (error) => {
-            res.status(500).json(createErrorResponse('Internal Server Error'));
+            res.status(500).json(createErrorResponse('Internal Server Error', formatError(error)));
         }
     );
 });
@@ -165,8 +165,7 @@ router.get('/', function (req, res) {
             res.status(200).json(createSuccessResponse(response));
         },
         (error) => {
-            console.log(error)
-            res.status(500).json(createErrorResponse('Internal Server Error'));
+            res.status(500).json(createErrorResponse('Internal Server Error', formatError(error)));
         }
     );
 });
@@ -189,7 +188,7 @@ router.get('/check', function (req, res) {
             res.status(200).json(createSuccessResponse({registered: result[0][0].userRegistered === 1}));
         },
         (error) => {
-            res.status(500).json(createErrorResponse('Internal Server Error'));
+            res.status(500).json(createErrorResponse('Internal Server Error', formatError(error)));
         }
     );
 });
@@ -227,8 +226,7 @@ router.post('/login', function (req, res) {
                                 res.status(200).json(createSuccessResponse({user: user}));
                             },
                             (thirdError) => {
-                                console.error(thirdError)
-                                res.status(500).json(createErrorResponse('Internal Server Error'));
+                                res.status(500).json(createErrorResponse('Internal Server Error', formatError(thirdError)));
                             }
                         );
                     } else {
@@ -244,15 +242,13 @@ router.post('/login', function (req, res) {
                                 }
                             },
                             (thirdError) => {
-                                console.error(thirdError)
                                 res.status(500).json(createErrorResponse('Internal Server Error'));
                             }
                         );
                     }
                 },
                 (otherError) => {
-                    console.error(otherError)
-                    res.status(500).json(createErrorResponse('Internal Server Error'));
+                    res.status(500).json(createErrorResponse('Internal Server Error', formatError(otherError)));
                 }
             );
         },
@@ -260,8 +256,7 @@ router.post('/login', function (req, res) {
             if (error == "InvalidCredentialsError") {
                 res.status(401).json(createErrorResponse("Invalid Credentials"))
             } else {
-                console.error(error)
-                res.status(500).json(createErrorResponse("Internal Server Error"))
+                res.status(500).json(createErrorResponse('Internal Server Error', formatError(error)));
             }
         }
     );
@@ -292,7 +287,7 @@ router.put('/block', function (req, res) {
             }
         },
         (error) => {
-            res.status(500).json(createErrorResponse('Internal Server Error'));
+            res.status(500).json(createErrorResponse('Internal Server Error', formatError(error)));
         }
     );
 });

@@ -4,7 +4,7 @@ const {executeQuery} = require("../config/database");
 const {
     validateBody,
     validateQuery,
-    validateKey
+    validateKey, formatError
 } = require("../config/validator");
 const {createErrorResponse, createSuccessResponse} = require("../config/response");
 
@@ -37,7 +37,7 @@ router.post('/', function (req, res) {
             if (error.errno == 1452) {
                 res.status(404).json(createErrorResponse('subjectId not found'))
             } else {
-                res.status(500).json(createErrorResponse('Internal Server Error'));
+                res.status(500).json(createErrorResponse('Internal Server Error', formatError(error)));
             }
         }
     );
@@ -66,7 +66,7 @@ router.delete('/', function (req, res) {
             }
         },
         (error) => {
-            res.status(500).json(createErrorResponse('Internal Server Error'));
+            res.status(500).json(createErrorResponse('Internal Server Error', formatError(error)));
         }
     );
 });
@@ -103,7 +103,7 @@ router.put('/', function (req, res) {
             if (error.errno == 1452) {
                 res.status(404).json(createErrorResponse('subjectId not found'))
             } else {
-                res.status(500).json(createErrorResponse('Internal Server Error'));
+                res.status(500).json(createErrorResponse('Internal Server Error', formatError(error)));
             }
         }
     );
@@ -148,7 +148,7 @@ router.get('/', function (req, res) {
             }
         },
         (error) => {
-            res.status(500).json(createErrorResponse('Internal Server Error'));
+            res.status(500).json(createErrorResponse('Internal Server Error', formatError(error)));
         }
     );
 });

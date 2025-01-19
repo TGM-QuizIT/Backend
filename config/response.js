@@ -1,9 +1,9 @@
-/* Function, which creates an object for a successful response */
-function createErrorResponse(reason) {
-    return {status: "Failure", reason: reason};
+/* Function, which creates an object for a failed response */
+function createErrorResponse(reason, details = {}) {
+    return{ status: "Failure", reason, ...details };
 }
 
-/* Function, which creates an object for a failed response */
+/* Function, which creates an object for a successful response */
 function createSuccessResponse(data = {}) {
     return {status: "Success", ...data};
 }
