@@ -253,4 +253,33 @@ router.post('/login', function (req, res) {
     );
 });
 
+/* User blocken */
+router.put('/block', function(req,res) {
+    if (!validateKey(req, res)) {
+        return;
+    }
+    const data = req.body;
+    const expected = {
+        userId: 'number',
+        userBlocked: 'boolean'
+    };
+    if (validateBody(data, expected, res)) {
+        return;
+    }
+
+    executeQuery("CALL UpdateUserBlocked(?, ?)", [data.userId, data.userBlocked], res,
+        (result) => {
+            const user = result[0][0];
+            if (!user) {
+                res.status(404).json(createErrorResponse("User not found"));
+            } else {
+                res.status(200).json(createSuccessResponse({user: user}));
+            }
+        },
+        (error) => {
+            res.status(500).json(createErrorResponse('Internal Server Error'));
+        }
+    );
+});
+
 module.exports = router;
