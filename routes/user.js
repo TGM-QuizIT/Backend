@@ -4,7 +4,8 @@ const {executeQuery} = require("../config/database");
 const {
     validateBody,
     validateQuery,
-    validateKey
+    validateKey,
+    formatError
 } = require("../config/validator");
 const {createErrorResponse, createSuccessResponse} = require("../config/response");
 const {createLDAPRequest} = require("../config/ldap");
@@ -31,11 +32,11 @@ router.post('/', function (req, res) {
     executeQuery("CALL InsertUser(?, ?, ?, ?, ?, ?)", [data.userName, parseInt(data.userClass.charAt(0)), data.userFullname, data.userClass, data.userType, data.userMail], res,
         (result) => {
             const user = result[0][0];
+            user.userBlocked = user.userBlocked === 1;
             res.status(201).json(createSuccessResponse({user: user}));
         },
-        (thirdError) => {
-            console.error(thirdError)
-            res.status(500).json(createErrorResponse('Internal Server Error'));
+        (error) => {
+            res.status(500).json(createErrorResponse('Internal Server Error', formatError(error)));
         }
     );
 });
@@ -63,7 +64,7 @@ router.delete('/', function (req, res) {
             }
         },
         (error) => {
-            res.status(500).json(createErrorResponse("Internal Server Error"));
+            res.status(500).json(createErrorResponse('Internal Server Error', formatError(error)));
         }
     );
 });
@@ -91,11 +92,12 @@ router.put('/', function (req, res) {
             if (!user) {
                 res.status(404).json(createErrorResponse("User not found"));
             } else {
+                user.userBlocked = user.userBlocked === 1;
                 res.status(200).json(createSuccessResponse({user: user}));
             }
         },
         (error) => {
-            res.status(500).json(createErrorResponse('Internal Server Error'));
+            res.status(500).json(createErrorResponse('Internal Server Error', formatError(error)));
         }
     );
 });
@@ -119,11 +121,12 @@ router.get('/year', function (req, res) {
             if (!user) {
                 res.status(404).json(createErrorResponse("User not found"));
             } else {
+                user.userBlocked = user.userBlocked === 1;
                 res.status(200).json(createSuccessResponse({user: user}));
             }
         },
         (error) => {
-            res.status(500).json(createErrorResponse('Internal Server Error'));
+            res.status(500).json(createErrorResponse('Internal Server Error', formatError(error)));
         }
     );
 });
@@ -148,13 +151,21 @@ router.get('/', function (req, res) {
 
     executeQuery("CALL GetUsers(?)", [data.year], res,
         (result) => {
+
+            const users = result[0];
+            if (users.length > 0) {
+                users.forEach(user => {
+                    user.userBlocked = user.userBlocked === 1;
+                });
+            }
+
             const response = {
-                users: result[0]
+                users: users
             };
             res.status(200).json(createSuccessResponse(response));
         },
         (error) => {
-            res.status(500).json(createErrorResponse('Internal Server Error'));
+            res.status(500).json(createErrorResponse('Internal Server Error', formatError(error)));
         }
     );
 });
@@ -177,7 +188,7 @@ router.get('/check', function (req, res) {
             res.status(200).json(createSuccessResponse({registered: result[0][0].userRegistered === 1}));
         },
         (error) => {
-            res.status(500).json(createErrorResponse('Internal Server Error'));
+            res.status(500).json(createErrorResponse('Internal Server Error', formatError(error)));
         }
     );
 });
@@ -211,11 +222,11 @@ router.post('/login', function (req, res) {
                         executeQuery("CALL InsertUser(?, ?, ?, ?, ?, ?)", [userName, parseInt(userClass.charAt(0)), userFullname, userClass, userType, userMail], res,
                             (thirdResult) => {
                                 const user = thirdResult[0][0];
+                                user.userBlocked = user.userBlocked === 1;
                                 res.status(200).json(createSuccessResponse({user: user}));
                             },
                             (thirdError) => {
-                                console.error(thirdError)
-                                res.status(500).json(createErrorResponse('Internal Server Error'));
+                                res.status(500).json(createErrorResponse('Internal Server Error', formatError(thirdError)));
                             }
                         );
                     } else {
@@ -226,19 +237,18 @@ router.post('/login', function (req, res) {
                                 if (!user) {
                                     res.status(404).json(createErrorResponse("User not found"));
                                 } else {
+                                    user.userBlocked = user.userBlocked === 1;
                                     res.status(200).json(createSuccessResponse({user: user}));
                                 }
                             },
                             (thirdError) => {
-                                console.error(thirdError)
                                 res.status(500).json(createErrorResponse('Internal Server Error'));
                             }
                         );
                     }
                 },
                 (otherError) => {
-                    console.error(otherError)
-                    res.status(500).json(createErrorResponse('Internal Server Error'));
+                    res.status(500).json(createErrorResponse('Internal Server Error', formatError(otherError)));
                 }
             );
         },
@@ -246,9 +256,38 @@ router.post('/login', function (req, res) {
             if (error == "InvalidCredentialsError") {
                 res.status(401).json(createErrorResponse("Invalid Credentials"))
             } else {
-                console.error(error)
-                res.status(500).json(createErrorResponse("Internal Server Error"))
+                res.status(500).json(createErrorResponse('Internal Server Error', formatError(error)));
             }
+        }
+    );
+});
+
+/* User blocken */
+router.put('/block', function (req, res) {
+    if (!validateKey(req, res)) {
+        return;
+    }
+    const data = req.body;
+    const expected = {
+        userId: 'number',
+        userBlocked: 'boolean'
+    };
+    if (validateBody(data, expected, res)) {
+        return;
+    }
+
+    executeQuery("CALL UpdateUserBlocked(?, ?)", [data.userId, data.userBlocked], res,
+        (result) => {
+            const user = result[0][0];
+            if (!user) {
+                res.status(404).json(createErrorResponse("User not found"));
+            } else {
+                user.userBlocked = user.userBlocked === 1;
+                res.status(200).json(createSuccessResponse({user: user}));
+            }
+        },
+        (error) => {
+            res.status(500).json(createErrorResponse('Internal Server Error', formatError(error)));
         }
     );
 });

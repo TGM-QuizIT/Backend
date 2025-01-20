@@ -4,7 +4,7 @@ const {executeQuery} = require("../config/database");
 const {
     validateBody,
     validateQuery,
-    validateKey
+    validateKey, formatError
 } = require("../config/validator");
 const {createErrorResponse, createSuccessResponse} = require("../config/response");
 
@@ -52,8 +52,7 @@ router.get('/focus', function(req, res) {
             res.status(200).json(createSuccessResponse({focusId: data.id, questions: questions}));
         },
         (error) => {
-            console.error(error)
-            res.status(500).json(createErrorResponse('Internal Server Error'));
+            res.status(500).json(createErrorResponse('Internal Server Error', formatError(error)));
         }
     );
 });
@@ -103,8 +102,7 @@ router.get('/subject', function(req, res) {
             res.status(200).json(createSuccessResponse({subjectId: data.id, questions: questions}));
         },
         (error) => {
-            console.error(error)
-            res.status(500).json(createErrorResponse('Internal Server Error'));
+            res.status(500).json(createErrorResponse('Internal Server Error', formatError(error)));
         }
     );
 });

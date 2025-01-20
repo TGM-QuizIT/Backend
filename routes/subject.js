@@ -4,7 +4,7 @@ const {executeQuery} = require("../config/database");
 const {
     validateBody,
     validateQuery,
-    validateKey
+    validateKey, formatError
 } = require("../config/validator");
 const {createErrorResponse, createSuccessResponse} = require("../config/response");
 
@@ -27,7 +27,7 @@ router.post('/', function (req, res) {
             res.status(201).json(createSuccessResponse({subject: result[0][0]}));
         },
         (error) => {
-            res.status(500).json(createErrorResponse('Internal Server Error'));
+            res.status(500).json(createErrorResponse('Internal Server Error', formatError(error)));
         }
     );
 });
@@ -55,7 +55,7 @@ router.delete('/', function (req, res) {
             }
         },
         (error) => {
-            res.status(500).json(createErrorResponse('Internal Server Error'));
+            res.status(500).json(createErrorResponse('Internal Server Error', formatError(error)));
         }
     );
 });
@@ -85,7 +85,7 @@ router.put('/', function (req, res) {
             }
         },
         (error) => {
-            res.status(500).json(createErrorResponse('Internal Server Error'));
+            res.status(500).json(createErrorResponse('Internal Server Error', formatError(error)));
         }
     );
 });
@@ -123,8 +123,7 @@ router.get('/', function (req, res) {
             }
         },
         (error) => {
-            console.log(error)
-            res.status(500).json(createErrorResponse('Internal Server Error'));
+            res.status(500).json(createErrorResponse('Internal Server Error', formatError(error)));
         }
     );
 });

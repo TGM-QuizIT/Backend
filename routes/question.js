@@ -4,7 +4,7 @@ const {executeQuery} = require("../config/database");
 const {
     validateBody,
     validateQuery,
-    validateKey
+    validateKey, formatError
 } = require("../config/validator");
 const {createErrorResponse, createSuccessResponse} = require("../config/response");
 
@@ -45,9 +45,8 @@ router.post('/', function (req, res) {
                                 res.status(404).json(createErrorResponse("Question not found"));
                             }
                         },
-                        (error) => {
-                            console.error(error)
-                            res.status(500).json(createErrorResponse('Internal Server Error'));
+                        (otherError) => {
+                            res.status(500).json(createErrorResponse('Internal Server Error', formatError(otherError)));
                         }
                     );
                 });
@@ -70,16 +69,14 @@ router.post('/', function (req, res) {
                         };
                         res.status(201).json(createSuccessResponse({question: question}));
                     },
-                    (error) => {
-                        console.error(error)
-                        res.status(500).json(createErrorResponse('Internal Server Error'));
+                    (otherError) => {
+                        res.status(500).json(createErrorResponse('Internal Server Error', formatError(otherError)));
                     }
                 );
             }
         },
         (error) => {
-            console.error(error)
-            res.status(500).json(createErrorResponse('Internal Server Error'));
+            res.status(500).json(createErrorResponse('Internal Server Error', formatError(error)));
         }
     );
 
@@ -108,8 +105,7 @@ router.delete('/', function (req, res) {
             }
         },
         (error) => {
-            console.error(error)
-            res.status(500).json(createErrorResponse('Internal Server Error'));
+            res.status(500).json(createErrorResponse('Internal Server Error', formatError(error)));
         }
     );
 });
@@ -152,9 +148,8 @@ router.put('/', function (req, res) {
                                 res.status(404).json(createErrorResponse("Option not found"));
                             }
                         },
-                        (error) => {
-                            console.error(error)
-                            res.status(500).json(createErrorResponse('Internal Server Error'));
+                        (otherError) => {
+                            res.status(500).json(createErrorResponse('Internal Server Error', formatError(otherError)));
                         }
                     );
                 });
@@ -177,16 +172,14 @@ router.put('/', function (req, res) {
                         };
                         res.status(200).json(createSuccessResponse({question: question}));
                     },
-                    (error) => {
-                        console.error(error)
-                        res.status(500).json(createErrorResponse('Internal Server Error'));
+                    (otherError) => {
+                        res.status(500).json(createErrorResponse('Internal Server Error', formatError(otherError)));
                     }
                 );
             }
         },
         (error) => {
-            console.error(error)
-            res.status(500).json(createErrorResponse('Internal Server Error'));
+            res.status(500).json(createErrorResponse('Internal Server Error', formatError(error)));
         }
     );
 });
@@ -230,8 +223,7 @@ router.get('/focus', function (req, res) {
             res.status(200).json(createSuccessResponse({focusId: data.id, questions: Object.values(questionsMap)}));
         },
         (error) => {
-            console.error(error)
-            res.status(500).json(createErrorResponse('Internal Server Error'));
+            res.status(500).json(createErrorResponse('Internal Server Error', formatError(error)));
         }
     );
 });
@@ -276,8 +268,7 @@ router.get('/subject', function (req, res) {
             res.status(200).json(createSuccessResponse({subjectId: data.id, questions: Object.values(questionsMap)}));
         },
         (error) => {
-            console.error(error)
-            res.status(500).json(createErrorResponse('Internal Server Error'));
+            res.status(500).json(createErrorResponse('Internal Server Error', formatError(error)));
         }
     );
 });
