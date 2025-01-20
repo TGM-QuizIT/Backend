@@ -135,14 +135,14 @@ router.get('/', function (req, res) {
         (result) => {
             if (result[0].length === 0) {
                 const response = {
-                    focus: [],
+                    focuss: [],
                 };
                 res.status(200).json(createSuccessResponse(response));
             } else if (result[0][0] && result[0][0].result == "404") {
                 res.status(404).json(createErrorResponse("Subject not found"));
             } else {
                 const response = {
-                    focus: result[0],
+                    focuss: result[0],
                 };
                 res.status(200).json(createSuccessResponse(response));
             }
