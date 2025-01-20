@@ -40,7 +40,7 @@ router.post('/', function (req, res) {
                         userType: friendship.user1Type,
                         userMail: friendship.user1Mail,
                     },
-                    user2: {
+                    friend: {
                         userId: friendship.user2Id,
                         userName: friendship.user2Name,
                         userYear: friendship.user2Year,
