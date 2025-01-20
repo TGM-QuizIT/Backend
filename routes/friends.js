@@ -49,7 +49,8 @@ router.post('/', function (req, res) {
                         userType: friendship.user2Type,
                         userMail: friendship.user2Mail,
                     },
-                    friendshipPending: friendship.friendshipPending === 1
+                    friendshipPending: friendship.friendshipPending === 1,
+                    friendshipSince: friendship.friendshipSince
                 }
                 res.status(201).json(createSuccessResponse({friendship: resFriendship}));
             }
@@ -128,7 +129,8 @@ router.put('/accept', function (req, res) {
                         userType: friendship.user2Type,
                         userMail: friendship.user2Mail,
                     },
-                    friendshipPending: friendship.friendshipPending === 1
+                    friendshipPending: friendship.friendshipPending === 1,
+                    friendshipSince: friendship.friendshipSince
                 }
                 res.status(200).json(createSuccessResponse({friendship: resFriendship}));
             }
@@ -191,7 +193,8 @@ router.get('/', function (req, res) {
                                 userType: friendship.userType,
                                 userMail: friendship.userMail
                             },
-                            actionReq: friendship.actionReq === 1
+                            actionReq: friendship.actionReq === 1,
+                            friendshipSince: friendship.friendshipSince
                         });
                     }
                 });
