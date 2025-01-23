@@ -1,13 +1,14 @@
 services:
   database:
     image: mariadb:latest
-    container_name: QuizIT-DB #Namen anpassen
+    container_name: QuizIT-DB # Namen anpassen
     environment:
       MYSQL_ROOT_PASSWORD: ${MARIADB_ROOT_PW}
       MYSQL_DATABASE: ${MARIADB_DATABASE}
       MYSQL_USER: ${MARIADB_USER}
       MYSQL_PASSWORD: ${MARIADB_PW}
       DB_PORT: ${MARIADB_PORT}
+      TZ: Europe/Vienna
     ports:
       - "${DEPLOYMENT_PORT_DB}:${MARIADB_PORT}"
     volumes:
@@ -17,7 +18,7 @@ services:
   api:
     build: .
     image: rtarnoczi/quizit-backend:develop
-    container_name: QuizIT-API #Namen anpassen
+    container_name: QuizIT-API # Namen anpassen
     platform: linux/arm64
     environment:
       - NODE_ENV=${NODE_ENV}
@@ -31,4 +32,3 @@ services:
 
 volumes:
   db_data:
-

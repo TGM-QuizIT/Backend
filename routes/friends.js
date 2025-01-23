@@ -31,26 +31,19 @@ router.post('/', function (req, res) {
                 const friendship = result[0][0];
                 const resFriendship = {
                     friendshipId: friendship.friendshipId,
-                    user1: {
-                        userId: friendship.user1Id,
-                        userName: friendship.user1Name,
-                        userYear: friendship.user1Year,
-                        userFullname: friendship.user1Fullname,
-                        userClass: friendship.user1Class,
-                        userType: friendship.user1Type,
-                        userMail: friendship.user1Mail,
-                    },
                     friend: {
-                        userId: friendship.user2Id,
-                        userName: friendship.user2Name,
-                        userYear: friendship.user2Year,
-                        userFullname: friendship.user2Fullname,
-                        userClass: friendship.user2Class,
-                        userType: friendship.user2Type,
-                        userMail: friendship.user2Mail,
+                        userId: friendship.userId,
+                        userName: friendship.userName,
+                        userYear: friendship.userYear,
+                        userFullname: friendship.userFullname,
+                        userClass: friendship.userClass,
+                        userType: friendship.userType,
+                        userMail: friendship.userMail,
+                        userBlocked: friendship.userBlocked === 1
                     },
                     friendshipPending: friendship.friendshipPending === 1,
-                    friendshipSince: friendship.friendshipSince
+                    friendshipSince: friendship.friendshipSince,
+                    actionReq: friendship.actionReq === 1
                 }
                 res.status(201).json(createSuccessResponse({friendship: resFriendship}));
             }
@@ -111,23 +104,15 @@ router.put('/accept', function (req, res) {
                 const friendship = result[0][0];
                 const resFriendship = {
                     friendshipId: friendship.friendshipId,
-                    user1: {
-                        userId: friendship.user1Id,
-                        userName: friendship.user1Name,
-                        userYear: friendship.user1Year,
-                        userFullname: friendship.user1Fullname,
-                        userClass: friendship.user1Class,
-                        userType: friendship.user1Type,
-                        userMail: friendship.user1Mail,
-                    },
-                    user2: {
-                        userId: friendship.user2Id,
-                        userName: friendship.user2Name,
-                        userYear: friendship.user2Year,
-                        userFullname: friendship.user2Fullname,
-                        userClass: friendship.user2Class,
-                        userType: friendship.user2Type,
-                        userMail: friendship.user2Mail,
+                    friend: {
+                        userId: friendship.userId,
+                        userName: friendship.userName,
+                        userYear: friendship.userYear,
+                        userFullname: friendship.userFullname,
+                        userClass: friendship.userClass,
+                        userType: friendship.userType,
+                        userMail: friendship.userMail,
+                        userBlocked: friendship.userBlocked === 1
                     },
                     friendshipPending: friendship.friendshipPending === 1,
                     friendshipSince: friendship.friendshipSince
@@ -177,7 +162,8 @@ router.get('/', function (req, res) {
                                 userFullname: friendship.userFullname,
                                 userClass: friendship.userClass,
                                 userType: friendship.userType,
-                                userMail: friendship.userMail
+                                userMail: friendship.userMail,
+                                userBlocked: friendship.userBlocked
                             },
                             friendshipSince: friendship.friendshipSince
                         });
@@ -191,7 +177,8 @@ router.get('/', function (req, res) {
                                 userFullname: friendship.userFullname,
                                 userClass: friendship.userClass,
                                 userType: friendship.userType,
-                                userMail: friendship.userMail
+                                userMail: friendship.userMail,
+                                userBlocked: friendship.userBlocked
                             },
                             actionReq: friendship.actionReq === 1,
                             friendshipSince: friendship.friendshipSince
