@@ -34,7 +34,7 @@ router.post('/', function (req, res) {
             } else if (result[0][0].result == "404-2") {
                 res.status(404).json(createErrorResponse("Focus not found"));
             } else {
-                res.status(201).json(createSuccessResponse({focus: result[0][0]}));
+                res.status(201).json(createSuccessResponse({result: result[0][0]}));
             }
         },
         (error) => {
@@ -69,7 +69,7 @@ router.post('/subject', function (req, res) {
             } else if (result[0][0].result == "404-2") {
                 res.status(404).json(createErrorResponse("Subject not found"));
             } else {
-                res.status(201).json(createSuccessResponse({focus: result[0][0]}));
+                res.status(201).json(createSuccessResponse({result: result[0][0]}));
             }
         },
         (error) => {
@@ -124,9 +124,12 @@ router.get('/', function (req, res) {
 
     executeQuery("CALL GetResults(?,?,?,?)", [data.userId, data.focusId, data.subjectId, data.amount], res,
         (result) => {
-            if (result[0][0].result == "404-1") {
+            if (result[0].length === 0) {
+                res.status(200).json(createSuccessResponse({results: []}));
+            }
+            else if (result[0][0] && result[0][0].result == "404-1") {
                 res.status(404).json(createErrorResponse("User not found"));
-            } else if (result[0][0].result == "404-2") {
+            } else if (result[0][0] && result[0][0].result == "404-2") {
                 res.status(404).json(createErrorResponse("Focus or subject not found"));
             } else {
                 res.status(200).json(createSuccessResponse({results: result[0]}));
