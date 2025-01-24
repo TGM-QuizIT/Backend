@@ -31,6 +31,8 @@ router.post('/', function (req, res) {
                 res.status(404).json(createErrorResponse("Friendship was not found."));
             } else if (result[0][0] && result[0][0].result == "404-2") {
                 res.status(404).json(createErrorResponse("Focus was not found."));
+            } else if (result[0][0] && result[0][0].result == "404-4") {
+                res.status(404).json(createErrorResponse("User was not found."));
             } else {
                 const challenge = result[0][0];
                 const resChallenge = {
@@ -92,6 +94,8 @@ router.post('/subject', function (req, res) {
                 res.status(404).json(createErrorResponse("Friendship was not found."));
             } else if (result[0][0] && result[0][0].result == "404-3") {
                 res.status(404).json(createErrorResponse("Subject was not found."));
+            } else if (result[0][0] && result[0][0].result == "404-4") {
+                res.status(404).json(createErrorResponse("User was not found."));
             } else {
                 const challenge = result[0][0];
                 const resChallenge = {
@@ -178,7 +182,7 @@ router.put('/', function(req,res) {
             } else if (result[0][0] && result[0][0].result == "404-2") {
                 res.status(404).json(createErrorResponse("Result was not found."));
             } else if (result[0][0] && result[0][0].result == "400") {
-                res.status(404).json(createErrorResponse("Result is not valid for this challenge."));
+                res.status(400).json(createErrorResponse("Result is not valid for this challenge."));
             } else {
                 const challenge = result[0][0];
                 var resChallenge = {}
@@ -288,9 +292,11 @@ router.get('/friendship', function(req,res) {
 
     executeQuery("CALL GetFriendshipChallenges(?,?)", [data.friendshipId, data.userId], res,
         (result) => {
-            if (result[0][0] && result[0][0].result == "404") {
+            if (result[0][0] && result[0][0].result == "404-1") {
                 res.status(404).json(createErrorResponse("Friendship was not found."));
-            } else {
+            } else if (result[0][0] && result[0][0].result == "404-2") {
+                res.status(404).json(createErrorResponse("User was not found."));
+            } else{
                 const challenges = result[0];
                 var resDoneChallenges = [];
                 var resOpenChallenges = [];
