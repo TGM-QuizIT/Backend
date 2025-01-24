@@ -157,4 +157,119 @@ router.delete('/', function (req, res) {
     );
 });
 
+/* Resultat zu einer Challenge zuweisen */
+router.put('/', function(req,res) {
+    if (!validateKey(req,res)) {
+        return;
+    }
+    const data = req.body;
+    const expected = {
+        challengeId: 'number',
+        resultId: 'number'
+    };
+    if (validateBody(data, expected, res)) {
+        return;
+    }
+
+    executeQuery("CALL AssignResultToChallenge(?,?)", [data.challengeId, data.resultId], res,
+        (result) => {
+            if (result[0][0] && result[0][0].result == "404-1") {
+                res.status(404).json(createErrorResponse("Challenge was not found."));
+            } else if (result[0][0] && result[0][0].result == "404-2") {
+                res.status(404).json(createErrorResponse("Result was not found."));
+            } else if (result[0][0] && result[0][0].result == "400") {
+                res.status(404).json(createErrorResponse("Result is not valid for this challenge."));
+            } else {
+                const challenge = result[0][0];
+                var resChallenge = {}
+                if (challenge.focusId) {
+                    resChallenge = {
+                        challengeId: challenge.challengeId,
+                        challengeDateTime: challenge.challengeDateTime,
+                        friendship: {
+                            friendshipId: challenge.friendshipId,
+                            friend: {
+                                userId: challenge.userId,
+                                userName: challenge.userName,
+                                userYear: challenge.userYear,
+                                userFullname: challenge.userFullname,
+                                userClass: challenge.userClass,
+                                userType: challenge.userType,
+                                userMail: challenge.userMail,
+                                userBlocked: challenge.userBlocked === 1,
+                            },
+                            friendshipPending: false,
+                            friendshipSince: challenge.friendshipSince,
+                            actionReq: false
+                        },
+                        focus: {
+                            focusId: challenge.focusId,
+                            focusName: challenge.focusName,
+                            focusYear: challenge.focusYear,
+                            focusImageAddress: challenge.focusImageAddress,
+                            questionCount: challenge.questionCount
+                        },
+                        friendScore: {
+                            resultId: challenge.resultId,
+                            resultScore: challenge.resultScore,
+                            userId: challenge.userId,
+                            focus: {
+                                focusId: challenge.focusId,
+                                focusName: challenge.focusName,
+                                focusYear: challenge.focusYear,
+                                focusImageAddress: challenge.focusImageAddress,
+                                questionCount: challenge.questionCount
+                            },
+                            resultDateTime: challenge.resultDateTime
+                        }
+                    }
+                }
+                else {
+                    resChallenge = {
+                        challengeId: challenge.challengeId,
+                        challengeDateTime: challenge.challengeDateTime,
+                        friendship: {
+                            friendshipId: challenge.friendshipId,
+                            friend: {
+                                userId: challenge.userId,
+                                userName: challenge.userName,
+                                userYear: challenge.userYear,
+                                userFullname: challenge.userFullname,
+                                userClass: challenge.userClass,
+                                userType: challenge.userType,
+                                userMail: challenge.userMail,
+                                userBlocked: challenge.userBlocked === 1,
+                            },
+                            friendshipPending: false,
+                            friendshipSince: challenge.friendshipSince,
+                            actionReq: false
+                        },
+                        subject: {
+                            subjectId: challenge.subjectId,
+                            subjectName: challenge.subjectName,
+                            subjectImageAddress: challenge.subjectImageAddress,
+                        },
+                        friendScore: {
+                            resultId: challenge.resultId,
+                            resultScore: challenge.resultScore,
+                            userId: challenge.userId,
+                            subject: {
+                                subjectId: challenge.subjectId,
+                                subjectName: challenge.subjectName,
+                                subjectImageAddress: challenge.subjectImageAddress,
+                            },
+                            resultDateTime: challenge.resultDateTime
+                        }
+                    }
+                }
+                res.status(200).json(createSuccessResponse({challenge: resChallenge}));
+            }
+        },
+        (error) => {
+            console.error(error)
+            res.status(500).json(createErrorResponse('Internal Server Error', formatError(error)));
+        }
+    );
+});
+
 module.exports = router;
