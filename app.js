@@ -33,6 +33,9 @@ app.use('/result', resultRouter);
 const friendsRouter = require('./routes/friends');
 app.use('/friends', friendsRouter);
 
+const challengeRouter = require('./routes/challenge');
+app.use('/challenge', challengeRouter)
+
 const otherRouter = require('./routes/other');
 app.use('/', otherRouter);
 

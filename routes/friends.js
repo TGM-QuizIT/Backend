@@ -163,7 +163,7 @@ router.get('/', function (req, res) {
                                 userClass: friendship.userClass,
                                 userType: friendship.userType,
                                 userMail: friendship.userMail,
-                                userBlocked: friendship.userBlocked
+                                userBlocked: friendship.userBlocked === 1
                             },
                             friendshipSince: friendship.friendshipSince
                         });
@@ -178,7 +178,7 @@ router.get('/', function (req, res) {
                                 userClass: friendship.userClass,
                                 userType: friendship.userType,
                                 userMail: friendship.userMail,
-                                userBlocked: friendship.userBlocked
+                                userBlocked: friendship.userBlocked === 1
                             },
                             actionReq: friendship.actionReq === 1,
                             friendshipSince: friendship.friendshipSince
