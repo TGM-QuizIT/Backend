@@ -4,15 +4,12 @@ const {executeQuery} = require("../config/database");
 const {
     validateBody,
     validateQuery,
-    validateKey, formatError
+    formatError
 } = require("../config/validator");
 const {createErrorResponse, createSuccessResponse} = require("../config/response");
 
 /* Focus hinzufügen */
 router.post('/', function (req, res) {
-    if (!validateKey(req,res)) {
-        return;
-    }
     const data = req.body;
     const expected = {
         focusName: 'string',
@@ -45,9 +42,6 @@ router.post('/', function (req, res) {
 
 /* Focus löschen */
 router.delete('/', function (req, res) {
-    if (!validateKey(req,res)) {
-        return;
-    }
     const data = req.query;
     const expected = {
         id: 'number',
@@ -73,9 +67,6 @@ router.delete('/', function (req, res) {
 
 /* Focus bearbeiten */
 router.put('/', function (req, res) {
-    if (!validateKey(req,res)) {
-        return;
-    }
     const data = req.body;
     const expected = {
         focusId: 'number',
@@ -112,9 +103,6 @@ router.put('/', function (req, res) {
 
 /* Alle (aktiven) Schwerpunkte zu einem Fach (und Jahr) holen */
 router.get('/', function (req, res) {
-    if (!validateKey(req,res)) {
-        return;
-    }
     const data = req.query;
     const expected = {
         id: 'number',

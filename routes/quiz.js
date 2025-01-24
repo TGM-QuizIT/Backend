@@ -4,15 +4,12 @@ const {executeQuery} = require("../config/database");
 const {
     validateBody,
     validateQuery,
-    validateKey, formatError
+    formatError
 } = require("../config/validator");
 const {createErrorResponse, createSuccessResponse} = require("../config/response");
 
 /* Quiz für Schwerpunkt generieren */
 router.get('/focus', function(req, res) {
-    if (!validateKey(req, res)) {
-        return;
-    }
     const data = req.query;
     const expected = {
         id: 'number',
@@ -59,9 +56,6 @@ router.get('/focus', function(req, res) {
 
 /* Quiz für Fach (und Jahr) generieren */
 router.get('/subject', function(req, res) {
-    if (!validateKey(req, res)) {
-        return;
-    }
     const data = req.query;
     const expected = {
         id: 'number',
@@ -106,4 +100,5 @@ router.get('/subject', function(req, res) {
         }
     );
 });
+
 module.exports = router;

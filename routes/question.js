@@ -4,15 +4,12 @@ const {executeQuery} = require("../config/database");
 const {
     validateBody,
     validateQuery,
-    validateKey, formatError
+    formatError
 } = require("../config/validator");
 const {createErrorResponse, createSuccessResponse} = require("../config/response");
 
 /* Frage hinzufügen */
 router.post('/', function (req, res) {
-    if (!validateKey(req, res)) {
-        return;
-    }
     const data = req.body;
     const expected = {
         questionText: 'string',
@@ -84,9 +81,6 @@ router.post('/', function (req, res) {
 
 /* Frage löschen */
 router.delete('/', function (req, res) {
-    if (!validateKey(req, res)) {
-        return;
-    }
     const data = req.query;
     const expected = {
         id: 'number',
@@ -112,9 +106,6 @@ router.delete('/', function (req, res) {
 
 /* Frage bearbeiten */
 router.put('/', function (req, res) {
-    if (!validateKey(req, res)) {
-        return;
-    }
     const data = req.body;
     const expected = {
         questionId: 'number',
@@ -186,9 +177,6 @@ router.put('/', function (req, res) {
 
 /* Fragen zu Schwerpunkt holen */
 router.get('/focus', function (req, res) {
-    if (!validateKey(req, res)) {
-        return;
-    }
     const data = req.query;
     const expected = {
         id: 'number',
@@ -230,9 +218,6 @@ router.get('/focus', function (req, res) {
 
 /* Fragen zu Fach (und Jahrgang holen */
 router.get('/subject', function (req, res) {
-    if (!validateKey(req, res)) {
-        return;
-    }
     const data = req.query;
     const expected = {
         id: 'number',

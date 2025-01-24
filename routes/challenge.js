@@ -4,16 +4,12 @@ const {executeQuery} = require("../config/database");
 const {
     validateBody,
     validateQuery,
-    validateKey,
     formatError
 } = require("../config/validator");
 const {createErrorResponse, createSuccessResponse} = require("../config/response");
 
 /* Challenge hinzufügen (Schwerpunkt)*/
 router.post('/', function (req, res) {
-    if (!validateKey(req, res)) {
-        return;
-    }
     const data = req.body;
     const expected = {
         friendshipId: 'number',
@@ -74,9 +70,6 @@ router.post('/', function (req, res) {
 
 /* Challenge hinzufügen (Fach)*/
 router.post('/subject', function (req, res) {
-    if (!validateKey(req, res)) {
-        return;
-    }
     const data = req.body;
     const expected = {
         friendshipId: 'number',
@@ -135,9 +128,6 @@ router.post('/subject', function (req, res) {
 
 /* Challenge löschen */
 router.delete('/', function (req, res) {
-    if (!validateKey(req, res)) {
-        return;
-    }
     const data = req.query;
     const expected = {
         id: 'number',
@@ -163,9 +153,6 @@ router.delete('/', function (req, res) {
 
 /* Resultat zu einer Challenge zuweisen */
 router.put('/', function(req,res) {
-    if (!validateKey(req,res)) {
-        return;
-    }
     const data = req.body;
     const expected = {
         challengeId: 'number',
@@ -278,9 +265,6 @@ router.put('/', function(req,res) {
 
 /* Alle Challenges zu einer Freundschaft holen */
 router.get('/friendship', function(req,res) {
-    if (!validateKey(req,res)) {
-        return;
-    }
     const data = req.query;
     const expected = {
         friendshipId: 'number',
@@ -425,9 +409,6 @@ router.get('/friendship', function(req,res) {
 
 /* Alle Challenges eines Users zu einem Fach holen */
 router.get('/', function(req,res) {
-    if (!validateKey(req,res)) {
-        return;
-    }
     const data = req.query;
     const expected = {
         subjectId: 'number',
@@ -572,9 +553,6 @@ router.get('/', function(req,res) {
 
 /* Alle abgeschlossenen Challenges eines Users holen */
 router.get('/done', function(req,res) {
-    if (!validateKey(req,res)) {
-        return;
-    }
     const data = req.query;
     const expected = {
         userId: 'number'
