@@ -266,4 +266,28 @@ router.put('/block', function (req, res) {
     );
 });
 
+/* Stats eines Users holen */
+router.get('/stats', function(req,res) {
+    const data = req.query;
+    const expected = {
+        id: 'number'
+    };
+    if (validateQuery(data, expected, res)) {
+        return;
+    }
+
+    executeQuery("CALL CalculateUsersStats(?)", [data.id], res,
+        (result) => {
+            if (result[0][0] && result[0][0].result == "404") {
+                res.status(404).json(createErrorResponse("Friendship was not found."));
+            } else {
+                res.status(200).json(createSuccessResponse({stats: result[0][0]}));
+            }
+        },
+        (error) => {
+            res.status(500).json(createErrorResponse('Internal Server Error', formatError(error)));
+        }
+    );
+});
+
 module.exports = router;
