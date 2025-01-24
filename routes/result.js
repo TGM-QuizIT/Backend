@@ -4,15 +4,12 @@ const {executeQuery} = require("../config/database");
 const {
     validateBody,
     validateQuery,
-    validateKey, formatError
+    formatError
 } = require("../config/validator");
 const {createErrorResponse, createSuccessResponse} = require("../config/response");
 
 /* Resultat eines Schwerpunktes hinzufügen */
 router.post('/', function (req, res) {
-    if (!validateKey(req, res)) {
-        return;
-    }
     const data = req.body;
     const expected = {
         resultScore: 'number',
@@ -45,9 +42,6 @@ router.post('/', function (req, res) {
 
 /* Resultat eines Faches hinzufügen */
 router.post('/subject', function (req, res) {
-    if (!validateKey(req, res)) {
-        return;
-    }
     const data = req.body;
     const expected = {
         resultScore: 'number',
@@ -80,9 +74,6 @@ router.post('/subject', function (req, res) {
 
 /* Resultat löschen */
 router.delete('/', function(req, res) {
-    if (!validateKey(req,res)) {
-        return;
-    }
     const data = req.query;
     const expected = {
         id: 'number',
@@ -108,9 +99,6 @@ router.delete('/', function(req, res) {
 
 /* Resultat eines Benutzers (und Schwerpunktes) holen */
 router.get('/', function (req, res) {
-    if (!validateKey(req, res)) {
-        return;
-    }
     const data = req.query;
     const expected = {
         userId: 'number',

@@ -11,6 +11,22 @@ app.use(express.json());
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
 
+const {createErrorResponse} = require("./config/response");
+// API-Key Validation
+app.use((req, res, next) => {
+    const key = req.headers['authorization'];
+
+    if(!key) {
+        res.status(401).json(createErrorResponse("Unauthorized: No API key provided."));
+    }
+
+    if (key !== process.env.API_KEY) {
+        res.status(403).json(createErrorResponse("Forbidden: Invalid API key."));
+    }
+
+    next();
+});
+
 // Initialize all routes within the backend
 const userRouter = require('./routes/user');
 app.use('/user', userRouter);
@@ -34,14 +50,10 @@ const friendsRouter = require('./routes/friends');
 app.use('/friends', friendsRouter);
 
 const challengeRouter = require('./routes/challenge');
-app.use('/challenge', challengeRouter)
+app.use('/challenge', challengeRouter);
 
-const otherRouter = require('./routes/other');
-app.use('/', otherRouter);
-
-// 404 Error handler
-app.use((req, res, next) => {
-    res.status(404).send('Not Found');
+app.use((req,res) => {
+    res.status(404).json(createErrorResponse("Not Found: No matching route."));
 });
 
 BigInt.prototype.toJSON = function () {

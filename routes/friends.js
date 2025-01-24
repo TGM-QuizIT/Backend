@@ -4,15 +4,12 @@ const {executeQuery} = require("../config/database");
 const {
     validateBody,
     validateQuery,
-    validateKey, formatError
+    formatError
 } = require("../config/validator");
 const {createErrorResponse, createSuccessResponse} = require("../config/response");
 
 /* Freundschaft hinzufügen */
 router.post('/', function (req, res) {
-    if (!validateKey(req, res)) {
-        return;
-    }
     const data = req.body;
     const expected = {
         user1Id: 'number',
@@ -56,9 +53,6 @@ router.post('/', function (req, res) {
 
 /* Freundschaft löschen */
 router.delete('/', function (req, res) {
-    if (!validateKey(req, res)) {
-        return;
-    }
     const data = req.query;
     const expected = {
         id: 'number',
@@ -84,9 +78,6 @@ router.delete('/', function (req, res) {
 
 /* Freundschaft annehmen */
 router.put('/accept', function (req, res) {
-    if (!validateKey(req, res)) {
-        return;
-    }
     const data = req.body;
     const expected = {
         id: 'number',
@@ -128,9 +119,6 @@ router.put('/accept', function (req, res) {
 
 /* Alle Freundschaften eines Users holen */
 router.get('/', function (req, res) {
-    if (!validateKey(req, res)) {
-        return;
-    }
     const data = req.query;
     const expected = {
         id: 'number',
