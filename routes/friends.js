@@ -24,6 +24,8 @@ router.post('/', function (req, res) {
         (result) => {
             if (result[0][0] && result[0][0].result == "404") {
                 res.status(404).json(createErrorResponse("User was not found."));
+            } else if (result[0][0] && result[0][0].result == "400") {
+                res.status(400).json(createErrorResponse("You are already friends with this person."));
             } else {
                 const friendship = result[0][0];
                 const resFriendship = {
