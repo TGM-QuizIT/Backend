@@ -55,7 +55,8 @@ router.post('/', function (req, res) {
                         focusName: challenge.focusName,
                         focusYear: challenge.focusYear,
                         focusImageAddress: challenge.focusImageAddress,
-                        questionCount: challenge.questionCount
+                        questionCount: challenge.questionCount,
+                        subjectId: challenge.subjectId
                     }
                 }
                 res.status(201).json(createSuccessResponse({challenge: resChallenge}));
@@ -198,7 +199,8 @@ router.put('/', function(req,res) {
                             focusName: challenge.focusName,
                             focusYear: challenge.focusYear,
                             focusImageAddress: challenge.focusImageAddress,
-                            questionCount: challenge.questionCount
+                            questionCount: challenge.questionCount,
+                            subjectId: challenge.subjectId
                         },
                         friendScore: {
                             resultId: challenge.resultId,
@@ -311,6 +313,7 @@ router.get('/friendship', function(req,res) {
                                 focusName: challenge.focusName,
                                 focusYear: challenge.focusYear,
                                 focusImageAddress: challenge.focusImageAddress,
+                                subjectId: challenge.fSubjectId,
                                 questionCount: challenge.questionCount
                             },
                             score: challenge.resultId !== null ? {
@@ -322,7 +325,8 @@ router.get('/friendship', function(req,res) {
                                     focusName: challenge.focusName,
                                     focusYear: challenge.focusYear,
                                     focusImageAddress: challenge.focusImageAddress,
-                                    questionCount: challenge.questionCount
+                                    questionCount: challenge.questionCount,
+                                    subjectId: challenge.fSubjectId
                                 },
                                 resultDateTime: challenge.resultDateTime
                             } : null,
@@ -335,7 +339,8 @@ router.get('/friendship', function(req,res) {
                                     focusName: challenge.focusName,
                                     focusYear: challenge.focusYear,
                                     focusImageAddress: challenge.focusImageAddress,
-                                    questionCount: challenge.questionCount
+                                    questionCount: challenge.questionCount,
+                                    subjectId: challenge.fSubjectId
                                 },
                                 resultDateTime: challenge.friendResultDateTime
                             } : null
@@ -455,7 +460,8 @@ router.get('/', function(req,res) {
                                 focusName: challenge.focusName,
                                 focusYear: challenge.focusYear,
                                 focusImageAddress: challenge.focusImageAddress,
-                                questionCount: challenge.questionCount
+                                questionCount: challenge.questionCount,
+                                subjectId: challenge.fSubjectId
                             },
                             score: challenge.resultId !== null ? {
                                 resultId: challenge.resultId,
@@ -466,7 +472,8 @@ router.get('/', function(req,res) {
                                     focusName: challenge.focusName,
                                     focusYear: challenge.focusYear,
                                     focusImageAddress: challenge.focusImageAddress,
-                                    questionCount: challenge.questionCount
+                                    questionCount: challenge.questionCount,
+                                    subjectId: challenge.fSubjectId
                                 },
                                 resultDateTime: challenge.resultDateTime
                             } : null,
@@ -479,7 +486,8 @@ router.get('/', function(req,res) {
                                     focusName: challenge.focusName,
                                     focusYear: challenge.focusYear,
                                     focusImageAddress: challenge.focusImageAddress,
-                                    questionCount: challenge.questionCount
+                                    questionCount: challenge.questionCount,
+                                    subjectId: challenge.fSubjectId
                                 },
                                 resultDateTime: challenge.friendResultDateTime
                             } : null
@@ -595,7 +603,8 @@ router.get('/done', function(req,res) {
                                 focusName: challenge.focusName,
                                 focusYear: challenge.focusYear,
                                 focusImageAddress: challenge.focusImageAddress,
-                                questionCount: challenge.questionCount
+                                questionCount: challenge.questionCount,
+                                subjectId: challenge.fSubjectId
                             },
                             score: challenge.resultId !== null ? {
                                 resultId: challenge.resultId,
@@ -606,7 +615,8 @@ router.get('/done', function(req,res) {
                                     focusName: challenge.focusName,
                                     focusYear: challenge.focusYear,
                                     focusImageAddress: challenge.focusImageAddress,
-                                    questionCount: challenge.questionCount
+                                    questionCount: challenge.questionCount,
+                                    subjectId: challenge.fSubjectId
                                 },
                                 resultDateTime: challenge.resultDateTime
                             } : null,
@@ -619,7 +629,8 @@ router.get('/done', function(req,res) {
                                     focusName: challenge.focusName,
                                     focusYear: challenge.focusYear,
                                     focusImageAddress: challenge.focusImageAddress,
-                                    questionCount: challenge.questionCount
+                                    questionCount: challenge.questionCount,
+                                    subjectId: challenge.fSubjectId
                                 },
                                 resultDateTime: challenge.friendResultDateTime
                             } : null
