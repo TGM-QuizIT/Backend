@@ -202,7 +202,7 @@ router.put('/', function(req,res) {
                             questionCount: challenge.questionCount,
                             subjectId: challenge.subjectId
                         },
-                        friendScore: {
+                        friendScore: challenge.resultId !== null ?{
                             resultId: challenge.resultId,
                             resultScore: challenge.resultScore,
                             userId: challenge.userId,
@@ -211,10 +211,11 @@ router.put('/', function(req,res) {
                                 focusName: challenge.focusName,
                                 focusYear: challenge.focusYear,
                                 focusImageAddress: challenge.focusImageAddress,
-                                questionCount: challenge.questionCount
+                                questionCount: challenge.questionCount,
+                                subjectId: challenge.subjectId
                             },
                             resultDateTime: challenge.resultDateTime
-                        }
+                        } : null
                     }
                 }
                 else {
@@ -242,7 +243,7 @@ router.put('/', function(req,res) {
                             subjectName: challenge.subjectName,
                             subjectImageAddress: challenge.subjectImageAddress,
                         },
-                        friendScore: {
+                        friendScore: challenge.resultId !== null ? {
                             resultId: challenge.resultId,
                             resultScore: challenge.resultScore,
                             userId: challenge.userId,
@@ -252,7 +253,7 @@ router.put('/', function(req,res) {
                                 subjectImageAddress: challenge.subjectImageAddress,
                             },
                             resultDateTime: challenge.resultDateTime
-                        }
+                        } : null
                     }
                 }
                 res.status(200).json(createSuccessResponse({challenge: resChallenge}));

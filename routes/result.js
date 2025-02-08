@@ -43,7 +43,8 @@ router.post('/', function (req, res) {
                         focusYear: resp.focusActive,
                         focusActive: resp.focusActive === 1,
                         focusImageAddress: resp.focusImageAddress,
-                        subjectId: resp.fSubjectId
+                        subjectId: resp.fSubjectId,
+                        questionCount: resp.questionCount,
                     }
                 }
                 res.status(201).json(createSuccessResponse({result: formatted}));
@@ -166,7 +167,8 @@ router.get('/', function (req, res) {
                             focusYear: r.focusActive,
                             focusActive: r.focusActive === 1,
                             focusImageAddress: r.focusImageAddress,
-                            subjectId: r.fSubjectId
+                            subjectId: r.fSubjectId,
+                            questionCount: r.questionCount,
                         };
                     }
 
