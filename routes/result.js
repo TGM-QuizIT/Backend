@@ -31,7 +31,22 @@ router.post('/', function (req, res) {
             } else if (result[0][0].result == "404-2") {
                 res.status(404).json(createErrorResponse("Focus not found"));
             } else {
-                res.status(201).json(createSuccessResponse({result: result[0][0]}));
+                const resp = result[0][0];
+                const formatted = {
+                    resultId: resp.resultId,
+                    resultScore: resp.resultScore,
+                    resultDateTime: resp.resultDateTime,
+                    userId: resp.userId,
+                    focus: {
+                        focusId: resp.focusId,
+                        focusName: resp.focusName,
+                        focusYear: resp.focusActive,
+                        focusActive: resp.focusActive === 1,
+                        focusImageAddress: resp.focusImageAddress,
+                        subjectId: resp.fSubjectId
+                    }
+                }
+                res.status(201).json(createSuccessResponse({result: formatted}));
             }
         },
         (error) => {
@@ -63,7 +78,20 @@ router.post('/subject', function (req, res) {
             } else if (result[0][0].result == "404-2") {
                 res.status(404).json(createErrorResponse("Subject not found"));
             } else {
-                res.status(201).json(createSuccessResponse({result: result[0][0]}));
+                const resp = result[0][0];
+                const formatted = {
+                    resultId: resp.resultId,
+                    resultScore: resp.resultScore,
+                    resultDateTime: resp.resultDateTime,
+                    userId: resp.userId,
+                    subject: {
+                        subjectId: resp.subjectId,
+                        subjectName: resp.subjectName,
+                        subjectActive: resp.subjectActive === 1,
+                        subjectImageAddress: resp.subjectImageAddress
+                    }
+                }
+                res.status(201).json(createSuccessResponse({result: formatted}));
             }
         },
         (error) => {
@@ -120,7 +148,42 @@ router.get('/', function (req, res) {
             } else if (result[0][0] && result[0][0].result == "404-2") {
                 res.status(404).json(createErrorResponse("Focus or subject not found"));
             } else {
-                res.status(200).json(createSuccessResponse({results: result[0]}));
+                const formattedResults = [];
+                const resp = result[0];
+
+                resp.forEach(r => {
+                    var formattedResult = {
+                        resultId: r.resultId,
+                        resultScore: r.resultScore,
+                        resultDateTime: r.resultDateTime,
+                        userId: r.userId
+                    };
+
+                    if (r.focusId !== null) {
+                        formattedResult.focus = {
+                            focusId: r.focusId,
+                            focusName: r.focusName,
+                            focusYear: r.focusActive,
+                            focusActive: r.focusActive === 1,
+                            focusImageAddress: r.focusImageAddress,
+                            subjectId: r.fSubjectId
+                        };
+                    }
+
+                    if (r.subjectId !== null) {
+                        formattedResult.subject = {
+                            subjectId: r.subjectId,
+                            subjectName: r.subjectName,
+                            subjectActive: r.subjectActive === 1,
+                            subjectImageAddress: r.subjectImageAddress
+                        };
+                    }
+
+                    formattedResults.push(formattedResult);
+                });
+
+
+                res.status(200).json(createSuccessResponse({results: formattedResults}));
             }
         },
         (error) => {
