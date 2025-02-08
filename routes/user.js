@@ -294,7 +294,7 @@ router.get('/stats', function(req,res) {
     executeQuery("CALL CalculateUsersStats(?)", [data.id], res,
         (result) => {
             if (result[0][0] && result[0][0].result == "404") {
-                res.status(404).json(createErrorResponse("Friendship was not found."));
+                res.status(404).json(createErrorResponse("User was not found."));
             } else {
                 res.status(200).json(createSuccessResponse({stats: result[0][0]}));
             }
