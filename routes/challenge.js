@@ -698,4 +698,143 @@ router.get('/done', function(req,res) {
     );
 });
 
+/* Alle offenen Challenges eines Users holen */
+router.get('/open', function(req,res) {
+    const data = req.query;
+    const expected = {
+        userId: 'number'
+    };
+    if (validateQuery(data, expected, res)) {
+        return;
+    }
+
+    executeQuery("CALL GetOpenChallenges(?)", [data.userId], res,
+        (result) => {
+            if (result[0][0] && result[0][0].result == "404") {
+                res.status(404).json(createErrorResponse("User was not found."));
+            } else {
+                const challenges = result[0];
+                var resDoneChallenges = [];
+                challenges.forEach(challenge => {
+                    var resChallenge = {};
+                    if (challenge.focusId) {
+                        resChallenge = {
+                            challengeId: challenge.challengeId,
+                            challengeDateTime: challenge.challengeDateTime,
+                            friendship: {
+                                friendshipId: challenge.friendshipId,
+                                friend: {
+                                    userId: challenge.userId,
+                                    userName: challenge.userName,
+                                    userYear: challenge.userYear,
+                                    userFullname: challenge.userFullname,
+                                    userClass: challenge.userClass,
+                                    userType: challenge.userType,
+                                    userMail: challenge.userMail,
+                                    userBlocked: challenge.userBlocked === 1,
+                                },
+                                friendshipPending: false,
+                                friendshipSince: challenge.friendshipSince,
+                                actionReq: false
+                            },
+                            focus: {
+                                focusId: challenge.focusId,
+                                focusName: challenge.focusName,
+                                focusYear: challenge.focusYear,
+                                focusImageAddress: challenge.focusImageAddress,
+                                questionCount: challenge.questionCount,
+                                subjectId: challenge.fSubjectId
+                            },
+                            score: challenge.resultId !== null ? {
+                                resultId: challenge.resultId,
+                                resultScore: challenge.resultScore,
+                                userId: +data.userId,
+                                focus: {
+                                    focusId: challenge.focusId,
+                                    focusName: challenge.focusName,
+                                    focusYear: challenge.focusYear,
+                                    focusImageAddress: challenge.focusImageAddress,
+                                    questionCount: challenge.questionCount,
+                                    subjectId: challenge.fSubjectId
+                                },
+                                resultDateTime: challenge.resultDateTime
+                            } : null,
+                            friendScore: challenge.friendResultId !== null ?{
+                                resultId: challenge.friendResultId,
+                                resultScore: challenge.friendResultScore,
+                                userId: challenge.userId,
+                                focus: {
+                                    focusId: challenge.focusId,
+                                    focusName: challenge.focusName,
+                                    focusYear: challenge.focusYear,
+                                    focusImageAddress: challenge.focusImageAddress,
+                                    questionCount: challenge.questionCount,
+                                    subjectId: challenge.fSubjectId
+                                },
+                                resultDateTime: challenge.friendResultDateTime
+                            } : null
+                        }
+                    }
+                    else {
+                        resChallenge = {
+                            challengeId: challenge.challengeId,
+                            challengeDateTime: challenge.challengeDateTime,
+                            friendship: {
+                                friendshipId: challenge.friendshipId,
+                                friend: {
+                                    userId: challenge.userId,
+                                    userName: challenge.userName,
+                                    userYear: challenge.userYear,
+                                    userFullname: challenge.userFullname,
+                                    userClass: challenge.userClass,
+                                    userType: challenge.userType,
+                                    userMail: challenge.userMail,
+                                    userBlocked: challenge.userBlocked === 1,
+                                },
+                                friendshipPending: false,
+                                friendshipSince: challenge.friendshipSince,
+                                actionReq: false
+                            },
+                            subject: {
+                                subjectId: challenge.subjectId,
+                                subjectName: challenge.subjectName,
+                                subjectImageAddress: challenge.subjectImageAddress,
+                            },
+                            score: challenge.resultId !== null ? {
+                                resultId: challenge.resultId,
+                                resultScore: challenge.resultScore,
+                                userId: +data.userId,
+                                subject: {
+                                    subjectId: challenge.subjectId,
+                                    subjectName: challenge.subjectName,
+                                    subjectImageAddress: challenge.subjectImageAddress,
+                                },
+                                resultDateTime: challenge.resultDateTime
+                            } : null,
+                            friendScore: challenge.friendResultId !== null ? {
+                                resultId: challenge.friendResultId,
+                                resultScore: challenge.friendResultScore,
+                                userId: challenge.userId,
+                                subject: {
+                                    subjectId: challenge.subjectId,
+                                    subjectName: challenge.subjectName,
+                                    subjectImageAddress: challenge.subjectImageAddress,
+                                },
+                                resultDateTime: challenge.friendResultDateTime
+                            } : null
+                        }
+                    }
+                    resDoneChallenges.push(resChallenge)
+                });
+
+                res.status(200).json(createSuccessResponse({openChallenges: resDoneChallenges}));
+            }
+        },
+        (error) => {
+            console.error(error)
+            res.status(500).json(createErrorResponse('Internal Server Error', formatError(error)));
+        }
+    );
+});
+
 module.exports = router;
