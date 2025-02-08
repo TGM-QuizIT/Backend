@@ -9,7 +9,7 @@ const {
 const {createErrorResponse, createSuccessResponse} = require("../config/response");
 
 /* Frage hinzufügen */
-router.post('/', function (req, res) {
+router.post('/', async function (req, res) {
     const data = req.body;
     const expected = {
         questionText: 'string',
@@ -29,24 +29,24 @@ router.post('/', function (req, res) {
     }
 
     executeQuery("CALL InsertQuestion(?,?,?,?,?)", [data.questionText, data.focusId, data.mChoice, data.textInput, data.imageAddress], res,
-        (result) => {
+        async (result) => {
             if (result[0][0].result == "404") {
-                res.status(404).json(createErrorResponse("Focus not found"));
-            } else {
-                const questionId = result[0][0].id;
-                const options = data.options;
-                options.forEach((option) => {
-                    executeQuery("CALL InsertOption(?,?,?)", [option.optionText, option.optionCorrect, questionId], res,
-                        (otherResult) => {
-                            if (otherResult[0][0].result == "404") {
-                                res.status(404).json(createErrorResponse("Question not found"));
-                            }
-                        },
-                        (otherError) => {
-                            res.status(500).json(createErrorResponse('Internal Server Error', formatError(otherError)));
-                        }
-                    );
-                });
+                return res.status(404).json(createErrorResponse("Focus not found"));
+            }
+
+            const questionId = result[0][0].id;
+            const options = data.options;
+
+            try {
+                await Promise.all(options.map(option =>
+                    new Promise((resolve, reject) => {
+                        executeQuery("CALL InsertOption(?,?,?)", [option.optionText, option.optionCorrect, questionId], res,
+                            () => resolve(),
+                            (otherError) => reject(otherError)
+                        );
+                    })
+                ));
+
                 executeQuery("CALL GetSingleQuestion(?)", [questionId], res,
                     (otherResult) => {
                         const questionData = otherResult[0];
@@ -64,19 +64,20 @@ router.post('/', function (req, res) {
                             textInput: questionData[0].textInput === 1,
                             imageAddress: questionData[0].imageAddress
                         };
-                        res.status(201).json(createSuccessResponse({question: question}));
+                        res.status(201).json(createSuccessResponse({ question: question }));
                     },
                     (otherError) => {
                         res.status(500).json(createErrorResponse('Internal Server Error', formatError(otherError)));
                     }
                 );
+            } catch (error) {
+                res.status(500).json(createErrorResponse('Internal Server Error', formatError(error)));
             }
         },
         (error) => {
             res.status(500).json(createErrorResponse('Internal Server Error', formatError(error)));
         }
     );
-
 });
 
 /* Frage löschen */
