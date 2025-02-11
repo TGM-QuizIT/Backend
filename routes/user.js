@@ -207,8 +207,8 @@ router.post('/login', function (req, res) {
                     if (otherResult[0] === undefined) {
                         const userName = result.mailNickname[0];
                         const userFullname = result.name[0];
-                        const userClass = result.department[0];
                         const userType = result.employeeType[0];
+                        const userClass = result.employeeType[0] !== "schueler" ? "Teacher" : result.department[0];
                         const userMail = result.mail[0]
 
                         executeQuery("CALL InsertUser(?, ?, ?, ?, ?, ?)", [userName, parseInt(userClass.charAt(0)), userFullname, userClass, userType, userMail], res,
@@ -222,7 +222,7 @@ router.post('/login', function (req, res) {
                             }
                         );
                     } else {
-                        const userClass = result.department[0];
+                        const userClass = result.employeeType[0] !== "schueler" ? "Teacher" : result.department[0];
                         executeQuery("CALL UpdateUser(?, ?)", [otherResult[0].userId, userClass], res,
                             (thirdResult) => {
                                 const user = thirdResult[0][0];
