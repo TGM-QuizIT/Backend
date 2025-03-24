@@ -18,10 +18,12 @@ app.use((req, res, next) => {
 
     if(!key) {
         res.status(401).json(createErrorResponse("Unauthorized: No API key provided."));
+        return;
     }
 
     if (key !== process.env.API_KEY) {
         res.status(403).json(createErrorResponse("Forbidden: Invalid API key."));
+        return;
     }
 
     next();
