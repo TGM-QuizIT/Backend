@@ -305,4 +305,29 @@ router.get('/stats', function(req,res) {
     );
 });
 
+/* Überprüfung, ob ein User blockiert ist */
+router.get('/blocked', function (req, res) {
+    const data = req.query
+    const expected = {
+        id: 'number',
+    };
+    if (validateQuery(data, expected, res)) {
+        return;
+    }
+
+    executeQuery("SELECT * FROM user WHERE userId = ?;", [data.id], res,
+        (result) => {
+            const user = result[0];
+            if (!user) {
+                res.status(404).json(createErrorResponse("User not found"));
+            } else {
+                res.status(200).json(createSuccessResponse({blocked: user.userBlocked === 1}));
+            }
+        },
+        (error) => {
+            res.status(500).json(createErrorResponse('Internal Server Error', formatError(error)));
+        }
+    );
+});
+
 module.exports = router;
