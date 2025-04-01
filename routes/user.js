@@ -184,7 +184,6 @@ router.post('/login', function (req, res) {
     if (validateBody(data, expected, res)) {
         return;
     }
-
     if (data.userName == 'appleDev' && data.password == process.env.APPLE_PASSWORD) {
         const user = {
             userId: 11,
@@ -194,6 +193,76 @@ router.post('/login', function (req, res) {
             userClass: "5AHIT",
             userType: "schueler",
             userMail: "developer@icloud.com",
+            userBlocked: false
+        }
+        res.status(200).json(createSuccessResponse({user: user}));
+        return
+    }
+    else if (data.userName == 'teacher1' && data.password == process.env.FIRST_PASSWORD) {
+        const user = {
+            userId: 1,
+            userName: "teacher1",
+            userYear: 4,
+            userFullname: "Teacher 1",
+            userClass: "3XHIT",
+            userType: "schueler",
+            userMail: "teacher1@tgm.ac.at",
+            userBlocked: false
+        }
+        res.status(200).json(createSuccessResponse({user: user}));
+        return
+    }
+    else if (data.userName == 'teacher2' && data.password == process.env.SECOND_PASSWORD) {
+        const user = {
+            userId: 2,
+            userName: "teacher2",
+            userYear: 4,
+            userFullname: "Teacher 2",
+            userClass: "3XHIT",
+            userType: "schueler",
+            userMail: "teacher2@tgm.ac.at",
+            userBlocked: false
+        }
+        res.status(200).json(createSuccessResponse({user: user}));
+        return
+    }
+    else if (data.userName == 'teacher3' && data.password == process.env.THIRD_PASSWORD) {
+        const user = {
+            userId: 3,
+            userName: "teacher3",
+            userYear: 4,
+            userFullname: "Teacher 3",
+            userClass: "3XHIT",
+            userType: "schueler",
+            userMail: "teacher3@tgm.ac.at",
+            userBlocked: false
+        }
+        res.status(200).json(createSuccessResponse({user: user}));
+        return
+    }
+    else if (data.userName == 'teacher4' && data.password == process.env.FOURTH_PASSWORD) {
+        const user = {
+            userId: 4,
+            userName: "teacher4",
+            userYear: 4,
+            userFullname: "Teacher 4",
+            userClass: "3XHIT",
+            userType: "schueler",
+            userMail: "teacher4@tgm.ac.at",
+            userBlocked: false
+        }
+        res.status(200).json(createSuccessResponse({user: user}));
+        return
+    }
+    else if (data.userName == 'teacher5' && data.password == process.env.FIFTH_PASSWORD) {
+        const user = {
+            userId: 5,
+            userName: "teacher5",
+            userYear: 4,
+            userFullname: "Teacher 5",
+            userClass: "3XHIT",
+            userType: "schueler",
+            userMail: "teacher5@tgm.ac.at",
             userBlocked: false
         }
         res.status(200).json(createSuccessResponse({user: user}));
