@@ -9,7 +9,7 @@ const {
 const {createErrorResponse, createSuccessResponse} = require("../config/response");
 
 /* Resultat eines Schwerpunktes hinzufügen */
-router.post('/', function (req, res) {
+router.post('/', function (req, res, next) {
     const data = req.body;
     const expected = {
         resultScore: 'number',
@@ -51,13 +51,13 @@ router.post('/', function (req, res) {
             }
         },
         (error) => {
-            res.status(500).json(createErrorResponse('Internal Server Error', formatError(error)));
+            next(error);
         }
     );
 });
 
 /* Resultat eines Faches hinzufügen */
-router.post('/subject', function (req, res) {
+router.post('/subject', function (req, res, next) {
     const data = req.body;
     const expected = {
         resultScore: 'number',
@@ -96,13 +96,13 @@ router.post('/subject', function (req, res) {
             }
         },
         (error) => {
-            res.status(500).json(createErrorResponse('Internal Server Error', formatError(error)));
+            next(error);
         }
     );
 });
 
 /* Resultat löschen */
-router.delete('/', function(req, res) {
+router.delete('/', function(req, res, next) {
     const data = req.query;
     const expected = {
         id: 'number',
@@ -121,13 +121,13 @@ router.delete('/', function(req, res) {
             }
         },
         (error) => {
-            res.status(500).json(createErrorResponse('Internal Server Error', formatError(error)));
+            next(error);
         }
     );
 });
 
 /* Resultat eines Benutzers (und Schwerpunktes) holen */
-router.get('/', function (req, res) {
+router.get('/', function (req, res, next) {
     const data = req.query;
     const expected = {
         userId: 'number',
@@ -189,7 +189,7 @@ router.get('/', function (req, res) {
             }
         },
         (error) => {
-            res.status(500).json(createErrorResponse('Internal Server Error', formatError(error)));
+            next(error);
         }
     );
 });

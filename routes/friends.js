@@ -9,7 +9,7 @@ const {
 const {createErrorResponse, createSuccessResponse} = require("../config/response");
 
 /* Freundschaft hinzufügen */
-router.post('/', function (req, res) {
+router.post('/', function (req, res, next) {
     const data = req.body;
     const expected = {
         user1Id: 'number',
@@ -48,13 +48,13 @@ router.post('/', function (req, res) {
             }
         },
         (error) => {
-            res.status(500).json(createErrorResponse('Internal Server Error', formatError(error)));
+            next(error);
         }
     );
 });
 
 /* Freundschaft löschen */
-router.delete('/', function (req, res) {
+router.delete('/', function (req, res, next) {
     const data = req.query;
     const expected = {
         id: 'number',
@@ -73,13 +73,13 @@ router.delete('/', function (req, res) {
             }
         },
         (error) => {
-            res.status(500).json(createErrorResponse('Internal Server Error', formatError(error)));
+            next(error);
         }
     );
 });
 
 /* Freundschaft annehmen */
-router.put('/accept', function (req, res) {
+router.put('/accept', function (req, res, next) {
     const data = req.body;
     const expected = {
         id: 'number',
@@ -114,13 +114,13 @@ router.put('/accept', function (req, res) {
             }
         },
         (error) => {
-            res.status(500).json(createErrorResponse('Internal Server Error', formatError(error)));
+            next(error);
         }
     );
 });
 
 /* Alle Freundschaften eines Users holen */
-router.get('/', function (req, res) {
+router.get('/', function (req, res, next) {
     const data = req.query;
     const expected = {
         id: 'number',
@@ -179,7 +179,7 @@ router.get('/', function (req, res) {
             }
         },
         (error) => {
-            res.status(500).json(createErrorResponse('Internal Server Error', formatError(error)));
+            next(error);
         }
     );
 });

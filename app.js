@@ -7,60 +7,63 @@ require('dotenv').config();
 app.use(cors());
 app.use(express.json());
 
-// View engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
 
-const {createErrorResponse} = require("./config/response");
-// API-Key Validation
+const { createErrorResponse } = require("./config/response");
+const { formatError } = require("./config/validator")
+const bugsnag = require('@bugsnag/js');
+const bugsnagPluginExpress = require('@bugsnag/plugin-express');
+
+const bugsnagClient = bugsnag.start({
+    apiKey: process.env.BUGSNAG_API_KEY,
+    plugins: [bugsnagPluginExpress]
+});
+
+const middleware = bugsnagClient.getPlugin('express');
+
+app.use(middleware.requestHandler);
+
 app.use((req, res, next) => {
     const key = req.headers['authorization'];
 
-    if(!key) {
-        res.status(401).json(createErrorResponse("Unauthorized: No API key provided."));
-        return;
+    if (!key) {
+        return res.status(401).json(createErrorResponse("Unauthorized: No API key provided."));
     }
 
     if (key !== process.env.API_KEY) {
-        res.status(403).json(createErrorResponse("Forbidden: Invalid API key."));
-        return;
+        return res.status(403).json(createErrorResponse("Forbidden: Invalid API key."));
     }
 
     next();
 });
 
-// Initialize all routes within the backend
-const userRouter = require('./routes/user');
-app.use('/user', userRouter);
+const routes = [
+    { path: '/user', router: require('./routes/user') },
+    { path: '/subject', router: require('./routes/subject') },
+    { path: '/focus', router: require('./routes/focus') },
+    { path: '/question', router: require('./routes/question') },
+    { path: '/quiz', router: require('./routes/quiz') },
+    { path: '/result', router: require('./routes/result') },
+    { path: '/friends', router: require('./routes/friends') },
+    { path: '/challenge', router: require('./routes/challenge') }
+];
 
-const subjectRouter = require('./routes/subject');
-app.use('/subject', subjectRouter);
+routes.forEach(({ path, router }) => app.use(path, router));
 
-const focusRouter = require('./routes/focus');
-app.use('/focus', focusRouter);
+app.use(middleware.errorHandler);
 
-const questionRouter = require('./routes/question');
-app.use('/question', questionRouter);
+app.use((err, req, res) => {
+    bugsnag.notify(err);
+    res.status(500).json(createErrorResponse('Internal Server Error', formatError(err)));
+});
 
-const quizRouter = require('./routes/quiz');
-app.use('/quiz', quizRouter);
-
-const resultRouter = require('./routes/result');
-app.use('/result', resultRouter);
-
-const friendsRouter = require('./routes/friends');
-app.use('/friends', friendsRouter);
-
-const challengeRouter = require('./routes/challenge');
-app.use('/challenge', challengeRouter);
-
-app.use((req,res) => {
+app.use((req, res) => {
     res.status(404).json(createErrorResponse("Not Found: No matching route."));
 });
 
 BigInt.prototype.toJSON = function () {
-    return Number(this); // Convert BigInt to "normal" integer
+    return Number(this); // Convert BigInt to normal integer
 };
 
-// Export the app module without starting it
 module.exports = app;

@@ -11,7 +11,7 @@ const {createLDAPRequest} = require("../config/ldap");
 
 
 /* User hinzufügen */
-router.post('/', function (req, res) {
+router.post('/', function (req, res, next) {
     const data = req.body;
     const expected = {
         userName: 'string',
@@ -32,13 +32,13 @@ router.post('/', function (req, res) {
             res.status(201).json(createSuccessResponse({user: user}));
         },
         (error) => {
-            res.status(500).json(createErrorResponse('Internal Server Error', formatError(error)));
+            next(error);
         }
     );
 });
 
 /* User löschen */
-router.delete('/', function (req, res) {
+router.delete('/', function (req, res, next) {
     const data = req.query;
     const expected = {
         id: 'number',
@@ -57,13 +57,13 @@ router.delete('/', function (req, res) {
             }
         },
         (error) => {
-            res.status(500).json(createErrorResponse('Internal Server Error', formatError(error)));
+            next(error);
         }
     );
 });
 
 /* Jahrgang bearbeiten Request */
-router.put('/', function (req, res) {
+router.put('/', function (req, res, next) {
     const data = req.body;
     const expected = {
         userId: 'number',
@@ -87,13 +87,13 @@ router.put('/', function (req, res) {
             }
         },
         (error) => {
-            res.status(500).json(createErrorResponse('Internal Server Error', formatError(error)));
+            next(error);
         }
     );
 });
 
 /* Jahrgang eines Users bekommen */
-router.get('/year', function (req, res) {
+router.get('/year', function (req, res, next) {
     const data = req.query
     const expected = {
         id: 'number',
@@ -113,13 +113,13 @@ router.get('/year', function (req, res) {
             }
         },
         (error) => {
-            res.status(500).json(createErrorResponse('Internal Server Error', formatError(error)));
+            next(error);
         }
     );
 });
 
 /* Alle User (aus einem Jahrgang) holen */
-router.get('/', function (req, res) {
+router.get('/', function (req, res, next) {
     const data = req.query;
     const expected = {
         year: 'optional number'
@@ -148,13 +148,13 @@ router.get('/', function (req, res) {
             res.status(200).json(createSuccessResponse(response));
         },
         (error) => {
-            res.status(500).json(createErrorResponse('Internal Server Error', formatError(error)));
+            next(error);
         }
     );
 });
 
 /* User bereits registriert */
-router.get('/check', function (req, res) {
+router.get('/check', function (req, res, next) {
     const data = req.query;
     const expected = {
         name: 'string'
@@ -168,13 +168,13 @@ router.get('/check', function (req, res) {
             res.status(200).json(createSuccessResponse({registered: result[0][0].userRegistered === 1}));
         },
         (error) => {
-            res.status(500).json(createErrorResponse('Internal Server Error', formatError(error)));
+            next(error);
         }
     );
 });
 
 /* User Login */
-router.post('/login', function (req, res) {
+router.post('/login', function (req, res, next) {
     const data = req.body;
     const expected = {
         userName: 'string',
@@ -287,7 +287,7 @@ router.post('/login', function (req, res) {
                                 res.status(200).json(createSuccessResponse({user: user}));
                             },
                             (thirdError) => {
-                                res.status(500).json(createErrorResponse('Internal Server Error', formatError(thirdError)));
+                                next(thirdError);
                             }
                         );
                     } else {
@@ -303,13 +303,13 @@ router.post('/login', function (req, res) {
                                 }
                             },
                             (thirdError) => {
-                                res.status(500).json(createErrorResponse('Internal Server Error'));
+                                next(thirdError)
                             }
                         );
                     }
                 },
                 (otherError) => {
-                    res.status(500).json(createErrorResponse('Internal Server Error', formatError(otherError)));
+                    next(otherError);
                 }
             );
         },
@@ -317,14 +317,14 @@ router.post('/login', function (req, res) {
             if (error == "InvalidCredentialsError") {
                 res.status(401).json(createErrorResponse("Invalid Credentials"))
             } else {
-                res.status(500).json(createErrorResponse('Internal Server Error', formatError(error)));
+                next(error);
             }
         }
     );
 });
 
 /* User blocken */
-router.put('/block', function (req, res) {
+router.put('/block', function (req, res, next) {
     const data = req.body;
     const expected = {
         userId: 'number',
@@ -345,13 +345,13 @@ router.put('/block', function (req, res) {
             }
         },
         (error) => {
-            res.status(500).json(createErrorResponse('Internal Server Error', formatError(error)));
+            next(error);
         }
     );
 });
 
 /* Stats eines Users holen */
-router.get('/stats', function(req,res) {
+router.get('/stats', function(req,res, next) {
     const data = req.query;
     const expected = {
         id: 'number'
@@ -369,13 +369,13 @@ router.get('/stats', function(req,res) {
             }
         },
         (error) => {
-            res.status(500).json(createErrorResponse('Internal Server Error', formatError(error)));
+            next(error);
         }
     );
 });
 
 /* Überprüfung, ob ein User blockiert ist */
-router.get('/blocked', function (req, res) {
+router.get('/blocked', function (req, res, next) {
     const data = req.query
     const expected = {
         id: 'number',
@@ -394,7 +394,7 @@ router.get('/blocked', function (req, res) {
             }
         },
         (error) => {
-            res.status(500).json(createErrorResponse('Internal Server Error', formatError(error)));
+            next(error);
         }
     );
 });
