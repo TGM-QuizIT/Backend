@@ -9,7 +9,7 @@ const {
 const {createErrorResponse, createSuccessResponse} = require("../config/response");
 
 /* Challenge hinzufügen (Schwerpunkt)*/
-router.post('/', function (req, res) {
+router.post('/', function (req, res, next) {
     const data = req.body;
     const expected = {
         friendshipId: 'number',
@@ -63,14 +63,13 @@ router.post('/', function (req, res) {
             }
         },
         (error) => {
-            console.log(error)
-            res.status(500).json(createErrorResponse('Internal Server Error', formatError(error)));
+            next(error);
         }
     );
 });
 
 /* Challenge hinzufügen (Fach)*/
-router.post('/subject', function (req, res) {
+router.post('/subject', function (req, res, next) {
     const data = req.body;
     const expected = {
         friendshipId: 'number',
@@ -121,14 +120,13 @@ router.post('/subject', function (req, res) {
             }
         },
         (error) => {
-            console.log(error)
-            res.status(500).json(createErrorResponse('Internal Server Error', formatError(error)));
+            next(error);
         }
     );
 });
 
 /* Challenge löschen */
-router.delete('/', function (req, res) {
+router.delete('/', function (req, res, next) {
     const data = req.query;
     const expected = {
         id: 'number',
@@ -147,13 +145,13 @@ router.delete('/', function (req, res) {
             }
         },
         (error) => {
-            res.status(500).json(createErrorResponse('Internal Server Error', formatError(error)));
+            next(error);
         }
     );
 });
 
 /* Resultat zu einer Challenge zuweisen */
-router.put('/', function(req,res) {
+router.put('/', function(req,res, next) {
     const data = req.body;
     const expected = {
         challengeId: 'number',
@@ -267,7 +265,7 @@ router.put('/', function(req,res) {
 });
 
 /* Alle Challenges zu einer Freundschaft holen */
-router.get('/friendship', function(req,res) {
+router.get('/friendship', function(req,res, next) {
     const data = req.query;
     const expected = {
         friendshipId: 'number',
@@ -407,14 +405,13 @@ router.get('/friendship', function(req,res) {
             }
         },
         (error) => {
-            console.error(error)
-            res.status(500).json(createErrorResponse('Internal Server Error', formatError(error)));
+            next(error);
         }
     );
 });
 
 /* Alle Challenges eines Users zu einem Fach holen */
-router.get('/', function(req,res) {
+router.get('/', function(req,res, next) {
     const data = req.query;
     const expected = {
         subjectId: 'number',
@@ -554,14 +551,13 @@ router.get('/', function(req,res) {
             }
         },
         (error) => {
-            console.error(error)
-            res.status(500).json(createErrorResponse('Internal Server Error', formatError(error)));
+            next(error);
         }
     );
 });
 
 /* Alle abgeschlossenen Challenges eines Users holen */
-router.get('/done', function(req,res) {
+router.get('/done', function(req,res, next) {
     const data = req.query;
     const expected = {
         userId: 'number'
@@ -693,14 +689,13 @@ router.get('/done', function(req,res) {
             }
         },
         (error) => {
-            console.error(error)
-            res.status(500).json(createErrorResponse('Internal Server Error', formatError(error)));
+            next(error);
         }
     );
 });
 
 /* Alle offenen Challenges eines Users holen */
-router.get('/open', function(req,res) {
+router.get('/open', function(req,res, next) {
     const data = req.query;
     const expected = {
         userId: 'number'
@@ -832,8 +827,7 @@ router.get('/open', function(req,res) {
             }
         },
         (error) => {
-            console.error(error)
-            res.status(500).json(createErrorResponse('Internal Server Error', formatError(error)));
+            next(error);
         }
     );
 });

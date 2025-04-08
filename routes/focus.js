@@ -9,7 +9,7 @@ const {
 const {createErrorResponse, createSuccessResponse} = require("../config/response");
 
 /* Focus hinzufügen */
-router.post('/', function (req, res) {
+router.post('/', function (req, res, next) {
     const data = req.body;
     const expected = {
         focusName: 'string',
@@ -34,14 +34,14 @@ router.post('/', function (req, res) {
             if (error.errno == 1452) {
                 res.status(404).json(createErrorResponse('subjectId not found'))
             } else {
-                res.status(500).json(createErrorResponse('Internal Server Error', formatError(error)));
+                next(error);
             }
         }
     );
 });
 
 /* Focus löschen */
-router.delete('/', function (req, res) {
+router.delete('/', function (req, res, next) {
     const data = req.query;
     const expected = {
         id: 'number',
@@ -60,13 +60,13 @@ router.delete('/', function (req, res) {
             }
         },
         (error) => {
-            res.status(500).json(createErrorResponse('Internal Server Error', formatError(error)));
+            next(error);
         }
     );
 });
 
 /* Focus bearbeiten */
-router.put('/', function (req, res) {
+router.put('/', function (req, res, next) {
     const data = req.body;
     const expected = {
         focusId: 'number',
@@ -94,7 +94,7 @@ router.put('/', function (req, res) {
             if (error.errno == 1452) {
                 res.status(404).json(createErrorResponse('subjectId not found'))
             } else {
-                res.status(500).json(createErrorResponse('Internal Server Error', formatError(error)));
+                next(error);
             }
         }
     );
@@ -102,7 +102,7 @@ router.put('/', function (req, res) {
 });
 
 /* Alle (aktiven) Schwerpunkte zu einem Fach (und Jahr) holen */
-router.get('/', function (req, res) {
+router.get('/', function (req, res, next) {
     const data = req.query;
     const expected = {
         id: 'number',
@@ -136,7 +136,7 @@ router.get('/', function (req, res) {
             }
         },
         (error) => {
-            res.status(500).json(createErrorResponse('Internal Server Error', formatError(error)));
+            next(error);
         }
     );
 });

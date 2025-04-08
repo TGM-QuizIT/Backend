@@ -9,7 +9,7 @@ const {
 const {createErrorResponse, createSuccessResponse} = require("../config/response");
 
 /* Frage hinzufügen */
-router.post('/', async function (req, res) {
+router.post('/', async function (req, res, next) {
     const data = req.body;
     const expected = {
         questionText: 'string',
@@ -67,21 +67,21 @@ router.post('/', async function (req, res) {
                         res.status(201).json(createSuccessResponse({ question: question }));
                     },
                     (otherError) => {
-                        res.status(500).json(createErrorResponse('Internal Server Error', formatError(otherError)));
+                        next(otherError);
                     }
                 );
             } catch (error) {
-                res.status(500).json(createErrorResponse('Internal Server Error', formatError(error)));
+                next(error);
             }
         },
         (error) => {
-            res.status(500).json(createErrorResponse('Internal Server Error', formatError(error)));
+            next(error);
         }
     );
 });
 
 /* Frage löschen */
-router.delete('/', function (req, res) {
+router.delete('/', function (req, res, next) {
     const data = req.query;
     const expected = {
         id: 'number',
@@ -100,13 +100,13 @@ router.delete('/', function (req, res) {
             }
         },
         (error) => {
-            res.status(500).json(createErrorResponse('Internal Server Error', formatError(error)));
+            next(error);
         }
     );
 });
 
 /* Frage bearbeiten */
-router.put('/', function (req, res) {
+router.put('/', function (req, res, next) {
     const data = req.body;
     const expected = {
         questionId: 'number',
@@ -141,7 +141,7 @@ router.put('/', function (req, res) {
                             }
                         },
                         (otherError) => {
-                            res.status(500).json(createErrorResponse('Internal Server Error', formatError(otherError)));
+                            next(otherError);
                         }
                     );
                 });
@@ -165,19 +165,19 @@ router.put('/', function (req, res) {
                         res.status(200).json(createSuccessResponse({question: question}));
                     },
                     (otherError) => {
-                        res.status(500).json(createErrorResponse('Internal Server Error', formatError(otherError)));
+                        next(otherError);
                     }
                 );
             }
         },
         (error) => {
-            res.status(500).json(createErrorResponse('Internal Server Error', formatError(error)));
+            next(error);
         }
     );
 });
 
 /* Fragen zu Schwerpunkt holen */
-router.get('/focus', function (req, res) {
+router.get('/focus', function (req, res, next) {
     const data = req.query;
     const expected = {
         id: 'number',
@@ -212,13 +212,13 @@ router.get('/focus', function (req, res) {
             res.status(200).json(createSuccessResponse({focusId: data.id, questions: Object.values(questionsMap)}));
         },
         (error) => {
-            res.status(500).json(createErrorResponse('Internal Server Error', formatError(error)));
+            next(error);
         }
     );
 });
 
 /* Fragen zu Fach (und Jahrgang holen */
-router.get('/subject', function (req, res) {
+router.get('/subject', function (req, res, next) {
     const data = req.query;
     const expected = {
         id: 'number',
@@ -254,7 +254,7 @@ router.get('/subject', function (req, res) {
             res.status(200).json(createSuccessResponse({subjectId: data.id, questions: Object.values(questionsMap)}));
         },
         (error) => {
-            res.status(500).json(createErrorResponse('Internal Server Error', formatError(error)));
+            next(error);
         }
     );
 });

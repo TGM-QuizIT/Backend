@@ -9,7 +9,7 @@ const {
 const {createErrorResponse, createSuccessResponse} = require("../config/response");
 
 /* Quiz für Schwerpunkt generieren */
-router.get('/focus', function(req, res) {
+router.get('/focus', function(req, res, next) {
     const data = req.query;
     const expected = {
         id: 'number',
@@ -49,13 +49,13 @@ router.get('/focus', function(req, res) {
             res.status(200).json(createSuccessResponse({focusId: data.id, questions: questions}));
         },
         (error) => {
-            res.status(500).json(createErrorResponse('Internal Server Error', formatError(error)));
+            next(error);
         }
     );
 });
 
 /* Quiz für Fach (und Jahr) generieren */
-router.get('/subject', function(req, res) {
+router.get('/subject', function(req, res, next) {
     const data = req.query;
     const expected = {
         id: 'number',
@@ -96,7 +96,7 @@ router.get('/subject', function(req, res) {
             res.status(200).json(createSuccessResponse({subjectId: data.id, questions: questions}));
         },
         (error) => {
-            res.status(500).json(createErrorResponse('Internal Server Error', formatError(error)));
+            next(error);
         }
     );
 });
