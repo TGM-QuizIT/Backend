@@ -74,4 +74,31 @@ Die API bietet verschiedene Endpunkte für unterschiedliche Operationen:
 - `/friends`: Endpoints zur Verwaltung von Freundschaften.
 - `/challenge`: Endpoints für die Verwaltung von Herausforderungen.
 
+## Error Monitoring
+
+Um Fehler während des Deployments zu überwachen wurde [BugSnag](https://www.bugsnag.com/) eingebunden. Der API-Key wurde in der .env-Datei bewusst die Umgebungsvariable leer gelassen. Es kann einfach ein neues Projekt erstellt werden wobei Server, dann Node.js und zuletzt Express.js auszuwählen ist. Anschließend wurde ein API-Key generiert, welcher einfach eingefügt werden kann.
+
+## Environment Variablen
+| Name                      | Verwendung |
+| --------                  | ------- |
+| API_PORT                  | Der interne Port, auf dem die API im Container läuft. |
+| DEPLOYMENT_PORT_API       | Der externe Port, auf dem die API auch dem Schulnetzwerk erreichbar ist. Ist mit dem Administrator festgelegt. |
+| MARIADB_PORT              | Der interne Port, auf dem die Datenbank im Container läuft.|
+| DEPLOYMENT_PORT_DB        | Der externe Port, auf dem die Datenbank auch dem Schulnetzwerk erreichbar ist. Ist mit dem Administrator festgelegt. |
+| API_KEY                   | Der API-Key, welcher bei jedem Request benötigt wird,  damit Abfragen nicht abgewiesen werden. |
+| NODE_ENV                  | Der Mode, in welchem die API läuft. |
+| MARIADB_ROOT_USER         | Der Benutzernamen des Super-Users der Datenbank |
+| MARIADB_ROOT_PW           | Das Passwort des Super-Users der Datenbank |
+| MARIADB_USER              | Der Benutzernamen des Standard-Users der Datenbank |
+| MARIADB_PW                | Der Passwort des Standard-Users der Datenbank |
+| MARIADB_DATABASE          | Der Namen der Datenbank im DBMS |
+| LDAP_URL                  | Die URL des TGM-LDAP-Server|
+| APPLE_PASSWORD            | Passwort des Apple-Test-Accounts |
+| FIRST_PASSWORD            | Passwort für Test-Account |
+| SECOND_PASSWORD           | Passwort für Test-Account |
+| THIRD_PASSWORD            | Passwort für Test-Account |
+| FOURTH_PASSWORD           | Passwort für Test-Account |
+| FIFTH_PASSWORD            | Passwort für Test-Account |
+| BUGSNAG_API_KEY           | API-Key des Error-Monitoring-Tools Bugsnag|
+
 ---
